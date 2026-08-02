@@ -16,6 +16,7 @@ pip install -q -r requirements.txt
 
 echo.
 echo Starting DeskOS...
-python -m deskos.main
+echo A small transparent bubble will appear in the corner of your screen.
+python -m deskos.assistant_app
 
 pause
