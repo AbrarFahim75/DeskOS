@@ -34,12 +34,13 @@ on Windows, tick "Add Python to PATH" during install).
    **macOS/Linux:** open a terminal in this folder and run `./launch.sh`
    (first time only: `chmod +x launch.sh` to make it runnable).
 4. The first run installs everything automatically (~1 minute). A
-   terminal window will show `DeskOS running.` — that's it working.
-5. Grant camera permission if your OS asks.
+   terminal window will show `DeskOS Assistant running.` — and a small,
+   transparent, round bubble will appear in the corner of your screen.
 
-DeskOS is now watching your context and will show a small message in the
-corner of your screen only when it's genuinely confident there's
-something worth flagging.
+Click the bubble to expand it into a small chat panel, type a message and
+press Enter. Click the "–" in the panel to collapse it back to just the
+bubble. Drag the bubble (or the panel's header) anywhere; it remembers
+where you put it next time.
 
 To stop DeskOS: close the terminal window, or press `Ctrl+C` inside it.
 
@@ -47,11 +48,22 @@ To stop DeskOS: close the terminal window, or press `Ctrl+C` inside it.
 
 - Just leave `launch.bat` / `launch.sh` running in the background while
   you work (minimize the terminal window — you don't need to watch it).
-- You'll occasionally see a small, quiet widget appear in the corner —
-  that's DeskOS. Drag it anywhere; it remembers where you put it next time.
-- It will not sound, pop up dialogs, or steal focus. If nothing appears,
-  that's by design — DeskOS prefers silence over a bad suggestion.
+- The bubble stays visible at all times, but stays small and out of the
+  way until you click it.
+- It will not sound, pop up dialogs, or steal focus. Voice commands are
+  coming next; for now, typing in the expanded panel is the way to talk
+  to it.
 - To fully exit, close the terminal window running DeskOS.
+
+## Full context-aware mode (camera + YOLO)
+
+The one-click launcher now starts the lightweight chat bubble
+(`deskos.assistant_app`), which needs no webcam. The original webcam/YOLO
+context-detection mode described elsewhere in this README is still
+available and unchanged — run `python -m deskos.main` instead (see
+Commands below) if you also want DeskOS to watch your activity and show
+contextual suggestions. Grant camera permission if your OS asks in that
+mode.
 
 ## Troubleshooting
 
@@ -79,7 +91,7 @@ Windows (PowerShell or cmd):
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-python -m deskos.main
+python -m deskos.assistant_app
 ```
 
 macOS/Linux:
@@ -87,8 +99,12 @@ macOS/Linux:
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python -m deskos.main
+python -m deskos.assistant_app
 ```
+
+Swap `deskos.assistant_app` for `deskos.main` to run the full webcam/YOLO
+context-aware mode instead. `python -m deskos.demo_widget` still previews
+the older transient suggestion toast on its own.
 
 Run tests: `pytest deskos/tests`
 
@@ -102,13 +118,17 @@ Services → UI) and how to extend each layer.
 
 Now implemented: real YOLO detection, full History→Habit aggregation,
 habit-aware Reasoning (learns from 👍/👎 feedback), feedback buttons on
-the widget (👍/👎/✖/⏰, with Remind Later re-showing later), and a
-fade in/out animated widget with mood accents and remembered position.
+the transient suggestion widget (👍/👎/✖/⏰, with Remind Later re-showing
+later), a fade in/out animated widget with mood accents and remembered
+position, and — new — a persistent transparent chat bubble
+(`deskos.assistant_app`) with click-to-expand/collapse and a typed chat
+panel.
 
 Still placeholder:
 
+- Voice input (e.g. "play my favorite song") — typed chat only for now.
 - More Services: Spotify, YouTube, browser awareness, calendar.
-- A proper OS-native overlay instead of the current Tkinter widget.
+- A proper OS-native overlay instead of the current Tkinter widgets.
 - Additional Context states beyond the MVP four (Thinking, Reading).
 - Packaging as a true installable app (e.g. PyInstaller `.exe`) instead
   of running from source via the launcher scripts.
