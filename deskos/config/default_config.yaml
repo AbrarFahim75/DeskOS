@@ -1,0 +1,30 @@
+camera:
+  device_index: 0
+  frame_width: 640
+  frame_height: 480
+  fps: 5
+
+perception:
+  detection_interval_sec: 1.0
+  model_path: "yolov8n.pt"
+  confidence_threshold: 0.5
+
+event_engine:
+  min_frames_to_confirm: 30    # ~6s at 5fps before a detection becomes an "event"
+  event_debounce_sec: 5.0
+
+context_engine:
+  min_confidence: 0.6
+  away_timeout_sec: 60.0
+
+decision_engine:
+  suggestion_cooldown_sec: 600.0   # never repeat a suggestion type within 10 min
+  min_confidence_to_act: 0.75
+
+storage:
+  data_dir: "~/.deskos"
+  habits_db: "habits.db"
+
+ui:
+  widget_fade_ms: 300
+  widget_max_visible: 1
