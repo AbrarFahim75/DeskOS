@@ -13,12 +13,20 @@ and lets any layer be swapped without touching its neighbours.
 
 ## Entry points
 
-DeskOS currently has two, which will be unified in a future milestone:
+One unified process runs everything:
 
 | Command | What it runs | Dependencies |
 |---|---|---|
-| `python -m deskos.assistant_app` | Chat bubble only (the default launcher) | base install |
-| `python -m deskos.main` | Full camera + YOLO context pipeline | `pip install -e ".[vision]"` |
+| `python -m deskos.app` | Assistant bubble, plus the context pipeline if the vision extra is installed | base; `[vision]` adds camera + YOLO |
+
+`deskos.main` and `deskos.assistant_app` remain as thin shims that call
+`deskos.app.main`, so older instructions keep working. Vision is detected
+at runtime: without `ultralytics`/`opencv` or a camera, DeskOS runs as a
+bubble and simply does not observe context.
+
+The single Tk root lives in `deskos.ui.ui_host.UIHost` on the main thread.
+The perception loop runs on a worker thread and never touches the UI
+directly; it acts through Services, which marshal onto the UI thread.
 
 ## Running
 
@@ -49,13 +57,7 @@ robust MVP over a sprawling one.
 
 ## Known architectural debt
 
-See [REVIEW.md](REVIEW.md) for the full assessment. The two items that
-constrain near-term work:
-
-1. **Two competing Tk threading models.** `ChatBubble` owns a `Tk` root on
-   the main thread; `FloatingWidget` owns a second one on a background
-   thread. They cannot run in the same process, which is why the two entry
-   points above are still separate.
-2. **`NotificationService` depends on the concrete `WidgetManager`** rather
-   than the `WidgetRenderer` abstraction, violating the downstream rule
-   stated above.
+See [REVIEW.md](REVIEW.md) for the full assessment. The Tk threading and
+Services-to-UI coupling issues were resolved in Milestone 2. One minor item
+remains: `OBJECT_APPEARED` is re-emitted as a liveness heartbeat, which the
+name does not convey.

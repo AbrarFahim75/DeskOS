@@ -1,7 +1,7 @@
 # DeskOS - Engineering Review
 
 Status of this document: living. Findings are checked off as milestones
-land. Last updated at Milestone 1.
+land. Last updated at Milestone 2.
 
 ---
 
@@ -32,23 +32,6 @@ itself.
 
 ## Open issues
 
-### 5. Two competing Tk threading models - **architectural**
-
-`ChatBubble` creates a `Tk` root and blocks the calling thread.
-`FloatingWidget` creates a *second* `Tk` root on a daemon background
-thread. Two roots in one process is unsafe, and Tk off the main thread is
-unsupported. Currently hidden because the two live in separate entry
-points - but the product needs bubble and suggestions together.
-
-Fix: one `Tk` root on the main thread, perception moved to a worker thread
-posting into the existing command queue. Resolve before building more UI.
-
-### 6. `NotificationService` depends on a concrete class
-
-It imports `WidgetManager` directly rather than the `WidgetRenderer`
-abstraction, a downstream dependency that violates the rule stated in
-`ARCHITECTURE.md`.
-
 ### 8. `OBJECT_APPEARED` is re-emitted as a heartbeat
 
 Once confirmed, a label re-emits `OBJECT_APPEARED` every
@@ -56,6 +39,29 @@ Once confirmed, a label re-emits `OBJECT_APPEARED` every
 liveness signal, not a new appearance. The Context Engine currently
 depends on it to keep labels from expiring, so renaming it means changing
 both layers together. Low priority, but it will confuse the next reader.
+
+---
+
+## Resolved in Milestone 2 (unified UI)
+
+- [x] **Two competing Tk roots.** `ChatBubble` and `FloatingWidget` each
+      created their own `Tk()` root on different threads, so they could not
+      run together. A new `UIHost` owns the single root and event loop on
+      the main thread; both widgets now `attach()` to it instead of
+      creating one. Verified end-to-end: bubble and suggestion widget in
+      one process, one root, one UI thread.
+- [x] **Background thread touching Tk.** The perception loop runs on a
+      worker thread and never calls a widget directly. It acts only through
+      Services, and `WidgetManager` marshals every render onto the UI
+      thread via `UIHost.post`.
+- [x] **`NotificationService` depended on a concrete class.** It now depends
+      on a new `WidgetPresenter` contract; `WidgetManager` implements it.
+      Services no longer import any concrete UI class.
+- [x] **Two entry points.** `deskos.app` runs the bubble and, when the
+      vision extra is installed, the context pipeline in one process.
+      `deskos.main` and `deskos.assistant_app` remain as thin shims. Vision
+      is detected at runtime, so the app still runs as a bubble when
+      `ultralytics`/`opencv` or a camera are absent.
 
 ---
 
@@ -115,6 +121,6 @@ both layers together. Low priority, but it will confuse the next reader.
 |---|---|
 | 0 | Repository hygiene - **done** |
 | 1 | Fix issues 1-4, each with a regression test - **done** |
-| 2 | Unify the UI thread and entry point (issues 5-6) |
+| 2 | Unify the UI thread and entry point (issues 5-6) - **done** |
 | 3 | Observable pipeline: see why DeskOS chose silence |
 | 4+ | Voice, real timer service, integrations |
