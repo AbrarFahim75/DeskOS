@@ -3,18 +3,19 @@
 Rules are intentionally simple and explicit (no learned weights) so they
 are auditable and debuggable while the rest of the pipeline is validated.
 TODO: replace with a learned/LLM-backed ContextInferer once enough labeled
-usage data exists — this class's interface will not need to change.
+usage data exists - this class's interface will not need to change.
 """
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 
 from deskos.config.settings import ContextEngineSettings
 from deskos.core import ContextSnapshot, ContextState, Event, EventType
 
 # MVP label -> state rules. First matching rule wins; order matters.
 # "book" alone implies STUDYING (COCO has no "notebook" class to pair it
-# with — a pragmatic MVP approximation).
+# with - a pragmatic MVP approximation).
 _LABEL_STATE_RULES: tuple[tuple[frozenset[str], ContextState], ...] = (
     (frozenset({"laptop", "keyboard"}), ContextState.CODING),
     (frozenset({"book"}), ContextState.STUDYING),
@@ -49,19 +50,27 @@ class RuleBasedContextEngine:
         }
 
         inferred_state, confidence = self._infer()
-        if confidence >= self._settings.min_confidence:
-            state_changed = inferred_state != self._current.state
-            if state_changed:
-                self._state_started_at = now
+        if confidence < self._settings.min_confidence:
+            # Not confident enough to revise our belief. Re-report the current
+            # one, but never re-report it as a transition: a transition happens
+            # once, and repeating the flag would make Knowledge log the same
+            # state change on every tick.
+            self._current = replace(self._current, is_transition=False)
+            return self._current
 
-            self._current = ContextSnapshot(
-                state=inferred_state,
-                confidence=confidence,
-                timestamp=now,
-                duration_in_state=now - self._state_started_at,
-                triggering_events=tuple(events),
-                previous_context=self._current if state_changed else self._current.previous_context,
-            )
+        state_changed = inferred_state != self._current.state
+        if state_changed:
+            self._state_started_at = now
+
+        self._current = ContextSnapshot(
+            state=inferred_state,
+            confidence=confidence,
+            timestamp=now,
+            duration_in_state=now - self._state_started_at,
+            triggering_events=tuple(events),
+            previous_context=self._current if state_changed else self._current.previous_context,
+            is_transition=state_changed,
+        )
         return self._current
 
     def current(self) -> ContextSnapshot:
@@ -74,7 +83,7 @@ class RuleBasedContextEngine:
             return ContextState.AWAY, 0.9
 
         # "Empty chair" isn't a single detectable object (COCO has no such
-        # class) — it's chair present + no person seen, so this is inferred
+        # class) - it's chair present + no person seen, so this is inferred
         # here rather than as a Perception label.
         if "chair" in active and "person" not in active:
             return ContextState.AWAY, 0.8

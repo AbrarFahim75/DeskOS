@@ -32,8 +32,11 @@ class PerceptionSettings:
 
 @dataclass(frozen=True)
 class EventEngineSettings:
-    min_frames_to_confirm: int
-    event_debounce_sec: float
+    """All timings are wall-clock seconds, independent of the loop tick rate."""
+
+    confirm_after_sec: float      # how long a label must persist to become an Event
+    event_debounce_sec: float     # minimum gap between repeat emissions
+    absence_grace_sec: float      # how long a label may vanish without losing progress
 
 
 @dataclass(frozen=True)

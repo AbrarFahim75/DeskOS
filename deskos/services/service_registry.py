@@ -1,14 +1,19 @@
 """Dispatches approved Actions to the Service(s) that handle them, and
-records every ExecutionResult into History — success or failure — so
+records every ExecutionResult into History - success or failure - so
 future reasoning can learn from real-world execution outcomes, not just
 approved intent.
+
+This is also where a suggestion is recorded as *shown*, which starts its
+cooldown. Doing it here rather than in the Decision Engine means the
+cooldown reflects what the user actually saw: a service that fails or
+skips does not silence that suggestion for the next ten minutes.
 """
 from __future__ import annotations
 
 import logging
 import time
 
-from deskos.core import Action, ExecutionResult, ExecutionStatus
+from deskos.core import Action, ExecutionResult, ExecutionStatus, SuggestionType
 from deskos.knowledge.interfaces import HistoryStore
 from deskos.services.interfaces import Service
 
@@ -28,6 +33,8 @@ class ServiceRegistry:
                     handled = True
                     result = self._execute_with_timing(service, action)
                     self._history.record_execution_result(result)
+                    if result.status == ExecutionStatus.SUCCESS:
+                        self._record_shown(action)
                     if result.status == ExecutionStatus.FAILED:
                         logger.warning(
                             "%s failed executing %s: %s", service.name, action.type, result.error_message
@@ -48,3 +55,13 @@ class ServiceRegistry:
                 error_message=str(exc),
             )
         return result
+
+    def _record_shown(self, action: Action) -> None:
+        """Start the cooldown for the suggestion behind a delivered Action.
+
+        Actions not originating from a Suggestion (or carrying an unknown
+        type) are simply ignored rather than treated as an error.
+        """
+        name = action.payload.get("suggestion_type")
+        if name in SuggestionType.__members__:
+            self._history.record_suggestion_shown(SuggestionType[name], time.time())

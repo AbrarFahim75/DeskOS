@@ -1,7 +1,7 @@
 """DeskOS entry point.
 
 Wires every layer together and runs the main perception loop. Contains NO
-business logic itself — only construction and orchestration, per the
+business logic itself - only construction and orchestration, per the
 architecture rule that main.py just wires modules together.
 """
 from __future__ import annotations
@@ -59,7 +59,10 @@ def build_app():
         detections = perception.process(frame)
         events = event_engine.process(detections)
         context = context_engine.update(events)
-        history_store.record_context_transition(context)
+        if context.is_transition:
+            # Only genuine state changes are history. Logging every tick would
+            # make a "session" one tick long and habit learning meaningless.
+            history_store.record_context_transition(context)
         suggestions = reasoner.reason(context, habit_store)
         actions = decision_engine.decide(suggestions)
         services.dispatch(actions)

@@ -1,6 +1,6 @@
 # Contributing to DeskOS
 
-Thanks for your interest. DeskOS is a small, opinionated project — the
+Thanks for your interest. DeskOS is a small, opinionated project - the
 guidelines below exist to keep it that way.
 
 ## Setup
@@ -44,8 +44,11 @@ even if the code is good:
 - `deskos/core` must never import from another DeskOS package.
 - Use type hints on public functions and document public APIs.
 - Comments should explain *why*, not *what*. The existing codebase does
-  this well — match it.
+  this well - match it.
 - Keep functions small and names meaningful. Readability beats cleverness.
+- Use plain ASCII punctuation in code, comments, and documentation. No em
+  dashes or en dashes; use a hyphen, comma, or colon instead. This keeps
+  diffs clean and avoids encoding surprises across editors and terminals.
 
 ## Adding a dependency
 
@@ -58,7 +61,7 @@ gracefully instead of crashing.
 ## Tests
 
 New behaviour needs a test. Pay particular attention to the Event, Context,
-and Decision layers — that is where regressions are least visible and most
+and Decision layers - that is where regressions are least visible and most
 damaging.
 
 Tests that require a display must skip themselves cleanly when none is

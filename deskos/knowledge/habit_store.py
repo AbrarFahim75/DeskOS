@@ -1,7 +1,7 @@
 """HabitStore implementation: derives patterns from a HistoryStore.
 
 Real (not stubbed) aggregation over whatever History has recorded so far.
-Deliberately simple in-Python computation rather than SQL aggregation —
+Deliberately simple in-Python computation rather than SQL aggregation -
 easy to reason about and independent of which HistoryStore backend is used.
 """
 from __future__ import annotations

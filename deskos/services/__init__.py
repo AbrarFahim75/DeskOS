@@ -1,6 +1,6 @@
 """Services package: integrations that execute approved Actions.
 
-Services never invent actions — they only execute what the Decision Engine
+Services never invent actions - they only execute what the Decision Engine
 approved. Each Service handles the subset of ActionTypes it knows about and
 ignores the rest.
 """

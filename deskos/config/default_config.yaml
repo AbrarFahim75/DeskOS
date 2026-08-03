@@ -1,4 +1,6 @@
 camera:
+  # fps is a hint to the capture device only. The rate DeskOS actually samples
+  # at is perception.detection_interval_sec below.
   device_index: 0
   frame_width: 640
   frame_height: 480
@@ -10,8 +12,11 @@ perception:
   confidence_threshold: 0.5
 
 event_engine:
-  min_frames_to_confirm: 30    # ~6s at 5fps before a detection becomes an "event"
-  event_debounce_sec: 5.0
+  # All values are wall-clock seconds, so they mean the same thing no matter
+  # how fast the main loop ticks.
+  confirm_after_sec: 6.0       # how long an object must persist to count as real
+  event_debounce_sec: 5.0      # minimum gap between repeat emissions
+  absence_grace_sec: 3.0       # brief detector flickers do not reset progress
 
 context_engine:
   min_confidence: 0.6

@@ -9,7 +9,7 @@ from deskos.core import Detection, Frame
 class Detector(ABC):
     """A single perception model (object detector, pose estimator, OCR, ...).
 
-    Each Detector answers only "what do I see", never "what does it mean" —
+    Each Detector answers only "what do I see", never "what does it mean" -
     that judgment belongs to the Event/Context Engines.
     """
 

@@ -6,7 +6,7 @@ COCO has no "notebook" or "empty_chair" classes:
 - STUDYING is inferred from "book" alone (Context Engine no longer
   requires a paired "notebook" detection).
 - "empty chair" is inferred by Context (chair present + no person), not
-  here — Perception only reports what it literally sees.
+  here - Perception only reports what it literally sees.
 """
 from __future__ import annotations
 

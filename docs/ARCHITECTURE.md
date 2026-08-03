@@ -6,7 +6,7 @@ Pipeline: Camera -> Perception -> Event Engine -> Context Engine -> Knowledge
 Each layer is a package under `deskos/` with an `interfaces.py` (ABC
 contracts) and one or more implementations. Layers depend only on `core`
 (shared dataclasses) and `config` (typed settings) plus the layer directly
-upstream of them — never downstream, never sideways.
+upstream of them - never downstream, never sideways.
 
 `core` imports nothing from DeskOS. That is what keeps the graph acyclic
 and lets any layer be swapped without touching its neighbours.

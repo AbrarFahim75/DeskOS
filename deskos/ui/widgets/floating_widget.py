@@ -1,6 +1,6 @@
 """Tkinter-based floating widget skeleton.
 
-Runs its own persistent background thread with a real Tk event loop —
+Runs its own persistent background thread with a real Tk event loop -
 tkinter windows never render or process input without one, and the app's
 own loop (in main.py) is a plain sleep-based tick, not a GUI event loop.
 Commands (show/dismiss) are handed to that thread via a thread-safe queue.
@@ -31,7 +31,7 @@ _MOOD_ACCENT: dict[WidgetMood, str] = {
 }
 
 _FADE_STEP_MS = 15
-_FADE_STEPS = 12  # ~180ms fade in/out — smooth, never flashy
+_FADE_STEPS = 12  # ~180ms fade in/out - smooth, never flashy
 
 
 class FloatingWidget(WidgetRenderer):
@@ -45,7 +45,7 @@ class FloatingWidget(WidgetRenderer):
         if self._thread is not None:
             return True
         try:
-            import tkinter  # noqa: F401  — fail fast on the caller's thread
+            import tkinter  # noqa: F401  - fail fast on the caller's thread
         except ImportError:
             logger.info("tkinter not available; widget will not be shown")
             return False

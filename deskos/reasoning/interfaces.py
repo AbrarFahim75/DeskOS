@@ -9,7 +9,7 @@ from deskos.knowledge.interfaces import HabitStore
 
 class Reasoner(ABC):
     """Produces candidate Suggestions from the current context (and,
-    optionally, derived Habits). Does NOT decide whether to act — that is
+    optionally, derived Habits). Does NOT decide whether to act - that is
     the Decision Engine's job. A Reasoner may propose nothing.
     """
 
