@@ -1,7 +1,7 @@
 # DeskOS - Engineering Review
 
 Status of this document: living. Findings are checked off as milestones
-land. Last updated at Milestone 0.
+land. Last updated at Milestone 1.
 
 ---
 
@@ -32,42 +32,6 @@ itself.
 
 ## Open issues
 
-### 1. Habit learning measures the tick rate, not behaviour - **critical**
-
-`main.py` calls `record_context_transition()` every tick regardless of
-whether the state changed. Measured: 3,600 rows per hour spent in a single
-unchanging state, ~86,400 rows/day, and `average_session_duration()`
-returning `1.00s` for a one-hour session because consecutive rows are one
-tick apart.
-
-The entire Knowledge layer currently produces meaningless output while
-appearing to work. Fix: record only on genuine state change.
-
-### 2. A single dropped frame destroys a confirmation streak - **critical**
-
-`EventEngine` deletes a label's streak the moment it is absent for one
-frame. Measured: 29 consecutive `laptop` detections, one dropped frame,
-streak reset to zero. YOLO flickers constantly on real webcam input, so
-events may fire rarely or never - DeskOS goes silent because it is broken,
-not because it judged silence correct.
-
-Fix: decay the streak on a miss, or use an N-of-last-M rolling ratio.
-
-### 3. Confirmation delay is 30s, not the documented 6s
-
-`default_config.yaml` annotates `min_frames_to_confirm: 30` as "~6s at
-5fps", but the main loop sleeps on `detection_interval_sec: 1.0` and reads
-one frame per tick. Camera `fps` never affects loop rate. Two competing
-time models exist; only one is real.
-
-### 4. Cooldown is spent before the user sees anything
-
-`DecisionEngine.decide()` writes `record_suggestion_shown()` and then
-returns the Action. If the service later fails or returns `SKIPPED`, the
-10-minute cooldown is burned on a suggestion never displayed. Decision is a
-policy layer and should not perform writes; recording belongs in
-`ServiceRegistry` on `SUCCESS`.
-
 ### 5. Two competing Tk threading models - **architectural**
 
 `ChatBubble` creates a `Tk` root and blocks the calling thread.
@@ -85,11 +49,38 @@ It imports `WidgetManager` directly rather than the `WidgetRenderer`
 abstraction, a downstream dependency that violates the rule stated in
 `ARCHITECTURE.md`.
 
-### 7. Test coverage is thin exactly where bugs were found
+### 8. `OBJECT_APPEARED` is re-emitted as a heartbeat
 
-No tests for `EventEngine` debounce, `ContextEngine` rules,
-`DecisionEngine` cooldown, or `HabitStore` aggregation - the four areas
-where issues 1-4 live. The correlation is not a coincidence.
+Once confirmed, a label re-emits `OBJECT_APPEARED` every
+`event_debounce_sec`. The name is wrong for what it does: it is a
+liveness signal, not a new appearance. The Context Engine currently
+depends on it to keep labels from expiring, so renaming it means changing
+both layers together. Low priority, but it will confuse the next reader.
+
+---
+
+## Resolved in Milestone 1 (correctness)
+
+- [x] **Habit learning measured the tick rate.** `main.py` wrote a history
+      row every tick. `ContextSnapshot` now carries `is_transition`, set
+      only when the state genuinely changes, and only those are recorded.
+      Measured before: 3,600 rows/hour and `average_session_duration`
+      returning 1.00s for a one-hour session. After: 2 rows and 3600s.
+- [x] **A dropped frame destroyed a confirmation streak.** The Event
+      Engine now tolerates absences shorter than `absence_grace_sec`, so a
+      detector flicker no longer resets progress.
+- [x] **Confirmation took 30s while the config claimed 6.** Confirmation is
+      now measured in wall-clock seconds (`confirm_after_sec`) rather than
+      frame counts, so it no longer depends on the loop tick rate. Camera
+      `fps` is documented as a capture hint only.
+- [x] **Cooldown was spent before delivery.** `record_suggestion_shown`
+      moved from `DecisionEngine` to `ServiceRegistry`, fired only on
+      `SUCCESS`. Decision is now pure policy and performs no writes.
+- [x] **Stale databases are rebuilt automatically.** `PRAGMA user_version`
+      gates the schema; a pre-v2 database is dropped and recreated, since
+      per-tick rows cannot be converted into real sessions.
+- [x] Test suite grew from 5 tests to 28, covering the Event, Context,
+      Decision, Knowledge and Services layers where all four bugs lived.
 
 ---
 
@@ -123,7 +114,7 @@ where issues 1-4 live. The correlation is not a coincidence.
 | Milestone | Goal |
 |---|---|
 | 0 | Repository hygiene - **done** |
-| 1 | Fix issues 1-4, each with a regression test |
+| 1 | Fix issues 1-4, each with a regression test - **done** |
 | 2 | Unify the UI thread and entry point (issues 5-6) |
 | 3 | Observable pipeline: see why DeskOS chose silence |
 | 4+ | Voice, real timer service, integrations |

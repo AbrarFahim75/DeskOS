@@ -6,6 +6,7 @@ from these tables.
 """
 from __future__ import annotations
 
+import logging
 import sqlite3
 import threading
 import time
@@ -21,6 +22,16 @@ from deskos.core import (
 )
 from deskos.knowledge.interfaces import HistoryStore
 
+logger = logging.getLogger(__name__)
+
+# Bump whenever the *meaning* of stored rows changes, not just their shape.
+#
+# v2: context_transitions holds one row per genuine state change. Before this,
+# a row was written on every loop tick, so "average session duration" measured
+# the tick interval instead of behaviour. Those rows cannot be converted into
+# real sessions, so a version mismatch rebuilds the database from empty.
+_SCHEMA_VERSION = 2
+
 
 class SQLiteHistoryStore(HistoryStore):
     def __init__(self, db_path: Path) -> None:
@@ -30,7 +41,38 @@ class SQLiteHistoryStore(HistoryStore):
         # both write to this connection concurrently - sqlite3 connections
         # aren't safe for concurrent use without external serialization.
         self._lock = threading.Lock()
+        self._reset_if_stale()
         self._init_schema()
+
+    def _reset_if_stale(self) -> None:
+        """Drop everything if the database predates the current schema.
+
+        Deliberately destructive: the alternative is silently mixing rows
+        that mean different things, which would keep habit learning wrong
+        for weeks. Nothing here is data the user authored, so rebuilding
+        costs them only the history DeskOS can re-observe.
+        """
+        version = self._conn.execute("PRAGMA user_version").fetchone()[0]
+        if version == _SCHEMA_VERSION:
+            return
+
+        # sqlite_* tables are SQLite's own bookkeeping (sqlite_sequence is
+        # created by AUTOINCREMENT) and cannot be dropped.
+        tables = self._conn.execute(
+            "SELECT name FROM sqlite_master "
+            "WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
+        ).fetchall()
+        if tables and version < _SCHEMA_VERSION:
+            logger.warning(
+                "Rebuilding habit database: stored data uses schema v%s, this "
+                "version needs v%s. Previous history cannot be migrated.",
+                version,
+                _SCHEMA_VERSION,
+            )
+            for (name,) in tables:
+                self._conn.execute(f"DROP TABLE IF EXISTS {name}")
+        self._conn.execute(f"PRAGMA user_version = {_SCHEMA_VERSION}")
+        self._conn.commit()
 
     def _init_schema(self) -> None:
         self._conn.executescript(

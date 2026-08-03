@@ -61,7 +61,7 @@ def main() -> None:
             print("Unknown state. Try: coding, studying, break, away, quit")
             continue
 
-        context = ContextSnapshot(state=state, confidence=0.9)
+        context = ContextSnapshot(state=state, confidence=0.9, is_transition=True)
         history_store.record_context_transition(context)
         suggestions = reasoner.reason(context, habit_store)
         actions = decision_engine.decide(suggestions)

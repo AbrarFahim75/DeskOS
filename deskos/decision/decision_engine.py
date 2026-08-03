@@ -3,10 +3,14 @@
 Enforces, in order: confidence threshold -> cooldown/repetition suppression.
 Anything that survives both becomes an Action. This is deliberately the
 only place these rules live (see product principles 1-3, 6).
+
+Decision is pure policy: it reads history to make a judgement but never
+writes to it. Recording that a suggestion was *shown* happens in the
+Services layer, once something was actually shown - otherwise a service
+that fails or skips would still burn the cooldown on a suggestion the user
+never saw.
 """
 from __future__ import annotations
-
-import time
 
 from deskos.config.settings import DecisionEngineSettings
 from deskos.core import Action, ActionType, Suggestion, SuggestionType, UserValue
@@ -57,7 +61,6 @@ class DecisionEngine(DecisionMaker):
             if action_type is None:
                 continue  # TODO: extend mapping as new SuggestionTypes land
 
-            self._history.record_suggestion_shown(suggestion.type, time.time())
             actions.append(
                 Action(
                     type=action_type,

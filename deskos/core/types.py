@@ -106,6 +106,7 @@ class ContextSnapshot:
     duration_in_state: float = 0.0            # seconds spent in `state` so far
     triggering_events: tuple[Event, ...] = field(default_factory=tuple)
     previous_context: ContextSnapshot | None = None
+    is_transition: bool = False               # True only when `state` just changed
     metadata: dict = field(default_factory=dict)
 
 

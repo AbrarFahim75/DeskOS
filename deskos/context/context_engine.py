@@ -8,6 +8,7 @@ usage data exists - this class's interface will not need to change.
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 
 from deskos.config.settings import ContextEngineSettings
 from deskos.core import ContextSnapshot, ContextState, Event, EventType
@@ -49,19 +50,27 @@ class RuleBasedContextEngine:
         }
 
         inferred_state, confidence = self._infer()
-        if confidence >= self._settings.min_confidence:
-            state_changed = inferred_state != self._current.state
-            if state_changed:
-                self._state_started_at = now
+        if confidence < self._settings.min_confidence:
+            # Not confident enough to revise our belief. Re-report the current
+            # one, but never re-report it as a transition: a transition happens
+            # once, and repeating the flag would make Knowledge log the same
+            # state change on every tick.
+            self._current = replace(self._current, is_transition=False)
+            return self._current
 
-            self._current = ContextSnapshot(
-                state=inferred_state,
-                confidence=confidence,
-                timestamp=now,
-                duration_in_state=now - self._state_started_at,
-                triggering_events=tuple(events),
-                previous_context=self._current if state_changed else self._current.previous_context,
-            )
+        state_changed = inferred_state != self._current.state
+        if state_changed:
+            self._state_started_at = now
+
+        self._current = ContextSnapshot(
+            state=inferred_state,
+            confidence=confidence,
+            timestamp=now,
+            duration_in_state=now - self._state_started_at,
+            triggering_events=tuple(events),
+            previous_context=self._current if state_changed else self._current.previous_context,
+            is_transition=state_changed,
+        )
         return self._current
 
     def current(self) -> ContextSnapshot:

@@ -59,7 +59,10 @@ def build_app():
         detections = perception.process(frame)
         events = event_engine.process(detections)
         context = context_engine.update(events)
-        history_store.record_context_transition(context)
+        if context.is_transition:
+            # Only genuine state changes are history. Logging every tick would
+            # make a "session" one tick long and habit learning meaningless.
+            history_store.record_context_transition(context)
         suggestions = reasoner.reason(context, habit_store)
         actions = decision_engine.decide(suggestions)
         services.dispatch(actions)
