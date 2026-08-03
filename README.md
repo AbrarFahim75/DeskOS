@@ -10,8 +10,12 @@
   <a href="https://github.com/datazenith-labs/DeskOS/actions/workflows/ci.yml">
     <img src="https://github.com/datazenith-labs/DeskOS/actions/workflows/ci.yml/badge.svg" alt="CI status">
   </a>
-  <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue" alt="Python versions">
+  <img src="https://img.shields.io/badge/python-3.10+-blue" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Supported platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
+  <a href="https://github.com/astral-sh/ruff">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Linted with Ruff">
+  </a>
   <img src="https://img.shields.io/badge/status-alpha-orange" alt="Alpha status">
 </p>
 
@@ -32,24 +36,12 @@ firehose, or a service that uploads your screen or camera anywhere.
 
 ---
 
-## Current status
+## Status
 
-DeskOS is in alpha. This table is deliberately blunt about what is real
-today, because a README that promises more than the code delivers wastes
-your time.
-
-| Capability | Status |
-|---|---|
-| Always-on assistant bubble (drag, expand, remember position) | Working |
-| Context detection from webcam (coding / studying / break / away) | Working, accuracy still rough |
-| Suggestion widget with explicit feedback controls | Working |
-| Silence rules: confidence gating, cooldowns, no repeats | Working |
-| Learning from your feedback | Partly working, see [docs/REVIEW.md](docs/REVIEW.md) |
-| Focus timer | Placeholder, logs only |
-| Voice interaction | Not started |
-| Desktop automation, Spotify, calendar, browser | Not started |
-
-Known bugs and the plan for fixing them are tracked openly in
+Alpha. The assistant bubble, webcam context detection, suggestion widget
+and the silence rules all work today. The focus timer is a placeholder,
+and voice interaction and desktop automation have not been started.
+Known bugs, and the plan for fixing them, are tracked openly in
 [docs/REVIEW.md](docs/REVIEW.md).
 
 ---
@@ -95,8 +87,7 @@ python -m deskos.main
 ```
 
 DeskOS then watches your webcam, infers what you are doing, and
-occasionally shows a small suggestion. Frames are processed in memory on
-your machine and are never written to disk or transmitted.
+occasionally shows a small suggestion.
 
 ---
 
@@ -122,14 +113,11 @@ Camera  ->  Perception  ->  Events  ->  Context  ->  Knowledge
 ```
 
 - **Perception** reports what it literally sees. It makes no judgements.
-- **Events** collapses noisy per-frame detections into confirmed occurrences.
 - **Context** infers an activity: coding, studying, break, away.
-- **Knowledge** records what happened and derives habits from it.
-- **Reasoning** proposes suggestions. It is free to propose anything.
 - **Decision** is the sole gatekeeper. Confidence thresholds, cooldowns and
   repetition suppression live here and nowhere else, so the rules that keep
   DeskOS quiet cannot be bypassed by a new feature.
-- **Services** execute approved actions. **UI** shows at most one widget.
+- **UI** shows at most one widget.
 
 Every layer defines an abstract interface, so any implementation can be
 replaced without touching its neighbours. Full detail in
@@ -150,21 +138,6 @@ replaced without touching its neighbours. Full detail in
 
 ---
 
-## Roadmap
-
-| Milestone | Focus |
-|---|---|
-| 0 | Repository hygiene, packaging, CI. Complete |
-| 1 | Correctness fixes in the event, context and decision layers |
-| 2 | Unified UI thread so the bubble and suggestions run together |
-| 3 | Observable pipeline: see why DeskOS chose to stay silent |
-| 4+ | Voice interaction, real timer, desktop automation, integrations |
-
-Longer term: local and cloud AI models, calendar, Spotify, browser and
-smart home integrations. These are directions, not commitments.
-
----
-
 ## Development
 
 ```bash
@@ -182,14 +155,11 @@ ruff check . --fix             # auto-fix lint issues
 CI runs `ruff` and `pytest` on Python 3.10 through 3.14 for every push and
 pull request.
 
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
+first: DeskOS is opinionated about restraint, and a change that makes it
+noisier will be declined even if the code is good.
+
 ---
-
-## Contributing
-
-Contributions are welcome, especially bug reports from real daily use.
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) first: DeskOS is opinionated
-about restraint, and a change that makes it noisier will be declined even
-if the code is good.
 
 ## License
 
