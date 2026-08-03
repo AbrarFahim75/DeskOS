@@ -100,7 +100,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
     applying env-var overrides on top.
     """
     path = config_path or _DEFAULT_CONFIG_PATH
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         raw = yaml.safe_load(f)
     raw = _override_from_env(raw)
 

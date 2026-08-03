@@ -16,8 +16,8 @@ import json
 import logging
 import queue
 import threading
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional
 
 from deskos.core import FeedbackType, WidgetMood
 from deskos.ui.interfaces import WidgetRenderer
@@ -37,8 +37,8 @@ _FADE_STEPS = 12  # ~180ms fade in/out — smooth, never flashy
 class FloatingWidget(WidgetRenderer):
     def __init__(self, position_file: Path | None = None) -> None:
         self._position_file = position_file
-        self._commands: "queue.Queue[tuple]" = queue.Queue()
-        self._thread: Optional[threading.Thread] = None
+        self._commands: queue.Queue[tuple] = queue.Queue()
+        self._thread: threading.Thread | None = None
         self._ready = threading.Event()
 
     def _ensure_thread_running(self) -> bool:
@@ -59,7 +59,7 @@ class FloatingWidget(WidgetRenderer):
         message: str,
         duration_sec: float,
         mood: WidgetMood = WidgetMood.NEUTRAL,
-        on_feedback: Optional[Callable[[FeedbackType], None]] = None,
+        on_feedback: Callable[[FeedbackType], None] | None = None,
     ) -> None:
         if not self._ensure_thread_running():
             return
@@ -129,7 +129,7 @@ class FloatingWidget(WidgetRenderer):
         state["toplevel"] = top
         self._fade(top, 0.0, 1.0, on_done=lambda: self._schedule_auto_dismiss(top, state, duration_sec))
 
-    def _feedback_clicked(self, state, feedback_type: FeedbackType, on_feedback: Optional[Callable]) -> None:
+    def _feedback_clicked(self, state, feedback_type: FeedbackType, on_feedback: Callable | None) -> None:
         if on_feedback is not None:
             on_feedback(feedback_type)
         self._close_widget(state)  # any feedback dismisses immediately, never waits out the timer
@@ -138,7 +138,7 @@ class FloatingWidget(WidgetRenderer):
         if state.get("toplevel") is top:
             state["dismiss_job"] = top.after(int(duration_sec * 1000), lambda: self._close_widget(state))
 
-    def _fade(self, widget, start: float, end: float, on_done: Optional[Callable] = None, step: int = 0) -> None:
+    def _fade(self, widget, start: float, end: float, on_done: Callable | None = None, step: int = 0) -> None:
         progress = step / _FADE_STEPS
         alpha = start + (end - start) * min(progress, 1.0)
         try:

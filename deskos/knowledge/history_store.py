@@ -11,7 +11,14 @@ import threading
 import time
 from pathlib import Path
 
-from deskos.core import ContextSnapshot, ContextState, ExecutionResult, FeedbackType, SuggestionFeedback, SuggestionType
+from deskos.core import (
+    ContextSnapshot,
+    ContextState,
+    ExecutionResult,
+    FeedbackType,
+    SuggestionFeedback,
+    SuggestionType,
+)
 from deskos.knowledge.interfaces import HistoryStore
 
 

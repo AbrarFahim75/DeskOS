@@ -3,7 +3,7 @@ rendering to a WidgetRenderer implementation.
 """
 from __future__ import annotations
 
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from deskos.config.settings import UISettings
 from deskos.core import FeedbackType, WidgetMood
@@ -19,7 +19,7 @@ class WidgetManager:
         self,
         message: str,
         mood: WidgetMood = WidgetMood.NEUTRAL,
-        on_feedback: Optional[Callable[[FeedbackType], None]] = None,
+        on_feedback: Callable[[FeedbackType], None] | None = None,
         duration_sec: float = 5.0,
     ) -> None:
         # Product principle 4: small floating widgets only, never stacked.

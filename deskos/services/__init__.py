@@ -5,8 +5,8 @@ approved. Each Service handles the subset of ActionTypes it knows about and
 ignores the rest.
 """
 from deskos.services.interfaces import Service
-from deskos.services.timer_service import TimerService
 from deskos.services.notification_service import NotificationService
 from deskos.services.service_registry import ServiceRegistry
+from deskos.services.timer_service import TimerService
 
 __all__ = ["Service", "TimerService", "NotificationService", "ServiceRegistry"]
