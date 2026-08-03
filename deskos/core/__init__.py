@@ -5,23 +5,23 @@ Camera -> Perception -> Events -> Context -> Knowledge -> Reasoning ->
 Decision -> Services -> UI acyclic.
 """
 from deskos.core.types import (
-    Frame,
+    Action,
+    ActionType,
+    ContextSnapshot,
+    ContextState,
     Detection,
     DetectionType,
     Event,
     EventType,
-    ContextState,
-    ContextSnapshot,
+    ExecutionResult,
+    ExecutionStatus,
+    FeedbackType,
+    Frame,
     Suggestion,
+    SuggestionFeedback,
     SuggestionType,
     UserValue,
     WidgetMood,
-    FeedbackType,
-    SuggestionFeedback,
-    Action,
-    ActionType,
-    ExecutionStatus,
-    ExecutionResult,
 )
 
 __all__ = [

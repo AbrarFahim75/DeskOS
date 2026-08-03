@@ -1,10 +1,31 @@
+# Python
 *.pyc
 __pycache__/
 *.egg-info/
+.eggs/
+build/
+dist/
+
+# Environments
 .venv/
 venv/
+env/
+
+# Tooling caches
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# DeskOS runtime data (lives in ~/.deskos, never in the repo)
 .deskos/
 *.db
+
+# Model weights: downloaded automatically by ultralytics on first use.
+# Keeping these out of git stops the repo growing by megabytes per model.
+*.pt
+*.pth
+*.onnx
+
+# OS noise
 .DS_Store
 Thumbs.db

@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
 
-
 # --------------------------------------------------------------------------
 # Camera -> Perception
 # --------------------------------------------------------------------------
@@ -106,7 +105,7 @@ class ContextSnapshot:
     timestamp: float = field(default_factory=time.time)
     duration_in_state: float = 0.0            # seconds spent in `state` so far
     triggering_events: tuple[Event, ...] = field(default_factory=tuple)
-    previous_context: "ContextSnapshot | None" = None
+    previous_context: ContextSnapshot | None = None
     metadata: dict = field(default_factory=dict)
 
 

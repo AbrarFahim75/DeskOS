@@ -20,8 +20,8 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,8 @@ _DRAG_THRESHOLD_PX = 4
 class ChatBubble:
     def __init__(
         self,
-        position_file: Optional[Path] = None,
-        on_message: Optional[Callable[[str], str]] = None,
+        position_file: Path | None = None,
+        on_message: Callable[[str], str] | None = None,
     ) -> None:
         self._position_file = position_file
         self._on_message = on_message or (lambda _text: "(no assistant connected yet)")

@@ -6,7 +6,6 @@ easy to reason about and independent of which HistoryStore backend is used.
 """
 from __future__ import annotations
 
-from collections import defaultdict
 from datetime import datetime
 
 from deskos.core import FeedbackType

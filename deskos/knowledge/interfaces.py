@@ -39,7 +39,7 @@ class HistoryStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def record_execution_result(self, result: "ExecutionResult") -> None:
+    def record_execution_result(self, result: ExecutionResult) -> None:
         """Log the real-world outcome of a Service executing an Action —
         success or failure alike. Feeds debugging, reliability metrics,
         and future adaptive reasoning (e.g. stop suggesting an integration

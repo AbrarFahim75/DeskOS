@@ -30,7 +30,7 @@ class CameraSource(ABC):
         """Release the underlying device/stream. Idempotent."""
         raise NotImplementedError
 
-    def __enter__(self) -> "CameraSource":
+    def __enter__(self) -> CameraSource:
         self.start()
         return self
 

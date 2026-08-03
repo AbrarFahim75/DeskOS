@@ -8,7 +8,14 @@ Decision stays the sole gatekeeper.
 """
 from __future__ import annotations
 
-from deskos.core import ContextSnapshot, ContextState, Suggestion, SuggestionType, UserValue, WidgetMood
+from deskos.core import (
+    ContextSnapshot,
+    ContextState,
+    Suggestion,
+    SuggestionType,
+    UserValue,
+    WidgetMood,
+)
 from deskos.knowledge.interfaces import HabitStore
 from deskos.reasoning.interfaces import Reasoner
 

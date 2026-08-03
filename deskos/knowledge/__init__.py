@@ -6,9 +6,9 @@ knowledge computed from History over time (typical study time, average
 coding session length). Reasoning/Decision consume both, but never need to
 compute habits from raw history themselves.
 """
-from deskos.knowledge.interfaces import HistoryStore, HabitStore
-from deskos.knowledge.history_store import SQLiteHistoryStore, InMemoryHistoryStore
 from deskos.knowledge.habit_store import InferredHabitStore
+from deskos.knowledge.history_store import InMemoryHistoryStore, SQLiteHistoryStore
+from deskos.knowledge.interfaces import HabitStore, HistoryStore
 
 __all__ = [
     "HistoryStore",

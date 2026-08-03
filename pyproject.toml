@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deskos"
+version = "0.1.0"
+description = "A calm, context-aware AI desktop companion."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "DataZenith Labs" }]
+keywords = ["desktop", "assistant", "computer-vision", "context-aware"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Desktop Environment",
+]
+
+# Base install: just enough to run the assistant bubble. Deliberately tiny
+# so first launch takes seconds, not a multi-gigabyte download.
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# Camera + YOLO context detection. `ultralytics` pulls in PyTorch, which is
+# several GB — that is why it is opt-in rather than a base dependency.
+vision = [
+    "opencv-python>=4.9",
+    "ultralytics>=8.2",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/datazenith-labs/DeskOS"
+Repository = "https://github.com/datazenith-labs/DeskOS"
+Issues = "https://github.com/datazenith-labs/DeskOS/issues"
+
+# Console commands created on install, so DeskOS can be started from any
+# directory instead of only from the repository root.
+[project.scripts]
+deskos = "deskos.assistant_app:main"
+deskos-vision = "deskos.main:main"
+
+[tool.setuptools.packages.find]
+include = ["deskos*"]
+exclude = ["tests*", "examples*", "docs*"]
+
+[tool.setuptools.package-data]
+deskos = ["config/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "UP",  # pyupgrade
+    "B",   # bugbear (likely bugs)
+]
+ignore = [
+    "E501",  # line length handled by the formatter, not the linter
+]

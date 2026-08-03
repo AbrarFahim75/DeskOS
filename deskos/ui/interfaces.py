@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from deskos.core import FeedbackType, WidgetMood
 
@@ -18,7 +18,7 @@ class WidgetRenderer(ABC):
         message: str,
         duration_sec: float,
         mood: WidgetMood = WidgetMood.NEUTRAL,
-        on_feedback: Optional[Callable[[FeedbackType], None]] = None,
+        on_feedback: Callable[[FeedbackType], None] | None = None,
     ) -> None:
         raise NotImplementedError
 

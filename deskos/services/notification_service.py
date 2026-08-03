@@ -9,7 +9,16 @@ from __future__ import annotations
 import threading
 import time
 
-from deskos.core import Action, ActionType, ExecutionResult, ExecutionStatus, FeedbackType, SuggestionFeedback, SuggestionType, WidgetMood
+from deskos.core import (
+    Action,
+    ActionType,
+    ExecutionResult,
+    ExecutionStatus,
+    FeedbackType,
+    SuggestionFeedback,
+    SuggestionType,
+    WidgetMood,
+)
 from deskos.knowledge.interfaces import HistoryStore
 from deskos.services.interfaces import Service
 from deskos.ui.widget_manager import WidgetManager
