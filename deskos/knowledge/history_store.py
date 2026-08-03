@@ -1,7 +1,7 @@
 """SQLite-backed HistoryStore: the raw factual log.
 
 Three append-only tables: context transitions, suggestions shown, and user
-responses. No aggregation happens here — that is HabitStore's job, reading
+responses. No aggregation happens here - that is HabitStore's job, reading
 from these tables.
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ class SQLiteHistoryStore(HistoryStore):
         db_path.parent.mkdir(parents=True, exist_ok=True)
         self._conn = sqlite3.connect(db_path, check_same_thread=False)
         # The tick loop (main thread) and the UI thread (widget feedback)
-        # both write to this connection concurrently — sqlite3 connections
+        # both write to this connection concurrently - sqlite3 connections
         # aren't safe for concurrent use without external serialization.
         self._lock = threading.Lock()
         self._init_schema()

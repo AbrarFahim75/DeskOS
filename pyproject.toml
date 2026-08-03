@@ -31,7 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # Camera + YOLO context detection. `ultralytics` pulls in PyTorch, which is
-# several GB — that is why it is opt-in rather than a base dependency.
+# several GB - that is why it is opt-in rather than a base dependency.
 vision = [
     "opencv-python>=4.9",
     "ultralytics>=8.2",

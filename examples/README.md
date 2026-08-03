@@ -1,7 +1,7 @@
 # Examples
 
 Developer and demo scripts. These are **not** part of the installed
-`deskos` package — they live here so the shipped application surface stays
+`deskos` package - they live here so the shipped application surface stays
 limited to real product code.
 
 Run them from the repository root:

@@ -1,7 +1,7 @@
 name: CI
 
 # Runs on every push and pull request so a broken change is caught before
-# it reaches main — not after you have built the next milestone on top of it.
+# it reaches main - not after you have built the next milestone on top of it.
 on:
   push:
     branches: [main]

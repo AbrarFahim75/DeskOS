@@ -113,7 +113,7 @@ class ChatBubble:
             header, text="DeskOS", bg=_ACCENT, fg="white", font=("Helvetica", 11, "bold"),
         ).pack(side="left", padx=10)
         collapse_btn = tk.Label(
-            header, text="–", bg=_ACCENT, fg="white", font=("Helvetica", 14, "bold"),
+            header, text="-", bg=_ACCENT, fg="white", font=("Helvetica", 14, "bold"),
             cursor="hand2",
         )
         collapse_btn.pack(side="right", padx=10)

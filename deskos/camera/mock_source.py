@@ -1,7 +1,7 @@
 """Deterministic CameraSource for tests and offline development.
 
 Cycles through a fixed list of Frames (or generates blank ones) instead of
-touching real hardware — lets Perception/Context/Decision be developed and
+touching real hardware - lets Perception/Context/Decision be developed and
 tested without a webcam attached.
 """
 from __future__ import annotations

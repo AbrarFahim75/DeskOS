@@ -1,7 +1,7 @@
 """DeskOS entry point.
 
 Wires every layer together and runs the main perception loop. Contains NO
-business logic itself — only construction and orchestration, per the
+business logic itself - only construction and orchestration, per the
 architecture rule that main.py just wires modules together.
 """
 from __future__ import annotations

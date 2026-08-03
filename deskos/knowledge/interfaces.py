@@ -1,6 +1,6 @@
 """Knowledge layer contracts, split into History (raw record) and Habits
 (derived knowledge). Knowledge stores and computes facts; it never decides
-or reacts — Reasoning/Decision read from it, they don't hand it authority.
+or reacts - Reasoning/Decision read from it, they don't hand it authority.
 """
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from deskos.core import ContextSnapshot, ExecutionResult, SuggestionFeedback, Su
 
 
 class HistoryStore(ABC):
-    """The raw, append-only factual record. No judgment, no aggregation —
+    """The raw, append-only factual record. No judgment, no aggregation -
     just "what happened, and when". This is the ground truth everything
     else (including Habits) is computed from.
     """
@@ -28,7 +28,7 @@ class HistoryStore(ABC):
     def record_feedback(self, feedback: SuggestionFeedback) -> None:
         """Log explicit, voluntary user feedback on a shown Suggestion.
 
-        Absence of feedback must never be synthesized and passed here —
+        Absence of feedback must never be synthesized and passed here -
         only genuine user actions (👍/👎/✖/⏰) are recorded.
         """
         raise NotImplementedError
@@ -40,7 +40,7 @@ class HistoryStore(ABC):
 
     @abstractmethod
     def record_execution_result(self, result: ExecutionResult) -> None:
-        """Log the real-world outcome of a Service executing an Action —
+        """Log the real-world outcome of a Service executing an Action -
         success or failure alike. Feeds debugging, reliability metrics,
         and future adaptive reasoning (e.g. stop suggesting an integration
         that keeps failing).
@@ -82,7 +82,7 @@ class HabitStore(ABC):
 
     @abstractmethod
     def acceptance_rate(self, suggestion_type_name: str) -> float | None:
-        """Derived from explicit HELPFUL/NOT_HELPFUL feedback only —
+        """Derived from explicit HELPFUL/NOT_HELPFUL feedback only -
         never from DISMISSED or missing responses. Lets Reasoning/Decision
         personalize without overfitting to a single interaction.
         """

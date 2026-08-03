@@ -1,5 +1,5 @@
 """Dispatches approved Actions to the Service(s) that handle them, and
-records every ExecutionResult into History — success or failure — so
+records every ExecutionResult into History - success or failure - so
 future reasoning can learn from real-world execution outcomes, not just
 approved intent.
 """

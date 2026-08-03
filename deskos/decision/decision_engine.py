@@ -21,7 +21,7 @@ _SUGGESTION_TO_ACTION: dict[SuggestionType, ActionType] = {
     SuggestionType.PLAY_FOCUS_MUSIC: ActionType.PLAY_MUSIC,
 }
 
-# Suggestion types where doing nothing has no real cost — MVP's proxy for
+# Suggestion types where doing nothing has no real cost - MVP's proxy for
 # "would the user lose meaningful value if we stayed silent?". TODO: make
 # this data-driven (e.g. weigh UserValue + habit context) once enough
 # feedback exists; a static allowlist is a deliberately conservative start.
@@ -74,7 +74,7 @@ class DecisionEngine(DecisionMaker):
 
     def _passes_user_value_check(self, suggestion: Suggestion) -> bool:
         """"If I do nothing right now, will the user lose meaningful
-        value?" A LOW-value suggestion for a low-stakes type answers "no" —
+        value?" A LOW-value suggestion for a low-stakes type answers "no" -
         prefer silence.
         """
         if suggestion.type in _LOW_STAKES_IF_SKIPPED and suggestion.estimated_value == UserValue.LOW:
@@ -82,7 +82,7 @@ class DecisionEngine(DecisionMaker):
         return True
 
     def _approval_reason(self, suggestion: Suggestion, since_last: float | None) -> str:
-        """Internal-only explainability string — never shown to the user."""
+        """Internal-only explainability string - never shown to the user."""
         reasons = []
         if suggestion.confidence >= 0.9:
             reasons.append("high confidence")

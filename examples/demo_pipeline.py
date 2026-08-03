@@ -1,7 +1,7 @@
-"""Real pipeline demo — lets you type a context state and watch it flow
+"""Real pipeline demo - lets you type a context state and watch it flow
 through the ACTUAL Reasoning -> Decision -> Services layers (not just the
 UI). Unlike demo_widget.py, this exercises real cooldowns, confidence
-gating, and the user-value check — including DeskOS choosing to stay
+gating, and the user-value check - including DeskOS choosing to stay
 silent, which is the point of the product.
 
 Run: python examples/demo_pipeline.py

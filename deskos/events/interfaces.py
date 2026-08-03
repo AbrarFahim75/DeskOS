@@ -14,6 +14,6 @@ class EventSource(ABC):
     @abstractmethod
     def process(self, detections: list[Detection]) -> list[Event]:
         """Feed one frame's worth of Detections; returns newly confirmed
-        Events (usually empty — most frames confirm nothing new).
+        Events (usually empty - most frames confirm nothing new).
         """
         raise NotImplementedError

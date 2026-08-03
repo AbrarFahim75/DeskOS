@@ -3,7 +3,7 @@
 One suggestion per context state, mirroring the product philosophy examples
 (coffee -> "Break?", empty chair -> pause timer). TODO: replace/augment
 with an LLM-backed Reasoner once Decision-layer gating has been validated
-to actually suppress noise well — Reasoning should stay free to propose,
+to actually suppress noise well - Reasoning should stay free to propose,
 Decision stays the sole gatekeeper.
 """
 from __future__ import annotations
@@ -50,7 +50,7 @@ class RuleBasedReasoner(Reasoner):
         # Learn from explicit feedback: a suggestion type the user has
         # repeatedly marked NOT_HELPFUL should stop being proposed, once
         # there's enough signal to trust it (see HabitStore's min-sample
-        # guard) — this is what makes reasoning personalize over time.
+        # guard) - this is what makes reasoning personalize over time.
         acceptance = habits.acceptance_rate(suggestion_type.name)
         if acceptance is not None and acceptance < 0.3:
             return []

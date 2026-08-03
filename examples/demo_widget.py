@@ -1,4 +1,4 @@
-"""Manual widget demo — summons the floating widget directly, bypassing
+"""Manual widget demo - summons the floating widget directly, bypassing
 camera/detection, so you can see and test it without waiting on real
 context inference. Not part of the production pipeline; a dev/demo tool.
 

@@ -55,7 +55,7 @@ class Detection:
 # --------------------------------------------------------------------------
 
 class EventType(Enum):
-    """A meaningful, debounced occurrence — never raw per-frame noise."""
+    """A meaningful, debounced occurrence - never raw per-frame noise."""
     OBJECT_APPEARED = auto()
     OBJECT_DISAPPEARED = auto()
     USER_PRESENT = auto()
@@ -97,7 +97,7 @@ class ContextSnapshot:
     """The Context Engine's current belief about what the user is doing.
 
     Rich by design: downstream layers (Knowledge, Reasoning, Decision, UI)
-    should rarely need to recompute anything about "what just happened" —
+    should rarely need to recompute anything about "what just happened" -
     it should already be here.
     """
     state: ContextState                       # current activity
@@ -124,7 +124,7 @@ class SuggestionType(Enum):
 
 class UserValue(Enum):
     """Reasoning's own estimate of how valuable a Suggestion is likely to
-    be to the user — distinct from `confidence` (how sure we are the
+    be to the user - distinct from `confidence` (how sure we are the
     context read is correct). Decision may weigh both.
     """
     LOW = auto()
@@ -133,7 +133,7 @@ class UserValue(Enum):
 
 
 class WidgetMood(Enum):
-    """Subtle visual register for a shown widget — never changes layout or
+    """Subtle visual register for a shown widget - never changes layout or
     behavior, only tone (color/weight). Kept to three so the vocabulary
     stays calm and easy to reason about.
     """
@@ -164,7 +164,7 @@ class FeedbackType(Enum):
     - NOT_HELPFUL: user explicitly said this suggestion type isn't useful.
     - HELPFUL: explicit positive signal.
     - REMIND_LATER: defer, not a judgment on usefulness.
-    - No response at all is NOT represented here — absence of feedback
+    - No response at all is NOT represented here - absence of feedback
       must never be recorded as if it were NOT_HELPFUL.
     """
     HELPFUL = auto()
@@ -193,10 +193,10 @@ class ActionType(Enum):
 @dataclass(frozen=True)
 class Action:
     """An approved instruction for a Service to execute. Produced only by
-    the Decision Engine — Services never invent their own actions.
+    the Decision Engine - Services never invent their own actions.
 
     `approval_reason` is internal-only (debugging/explainability, e.g.
-    "high confidence", "cooldown expired", "high estimated value") — never
+    "high confidence", "cooldown expired", "high estimated value") - never
     shown to the user.
     """
     type: ActionType
@@ -206,7 +206,7 @@ class Action:
 
 
 class ExecutionStatus(Enum):
-    """Outcome of a Service actually executing an Action. Internal-only —
+    """Outcome of a Service actually executing an Action. Internal-only -
     used for debugging, reliability, analytics, and future adaptive
     reasoning, never shown to the user.
     """

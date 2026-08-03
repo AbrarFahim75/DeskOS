@@ -2,7 +2,7 @@
 whatever explicit feedback the user gives back into History.
 
 Kept as a Service (not a direct UI call from Decision) so Decision never
-imports UI — it only returns Actions, per architecture rule.
+imports UI - it only returns Actions, per architecture rule.
 """
 from __future__ import annotations
 
@@ -28,13 +28,13 @@ _SUGGESTION_COPY: dict[str, str] = {
     "PLAY_FOCUS_MUSIC": "\U0001F3B5 Focus music?",
 }
 
-_REMIND_LATER_DELAY_SEC = 600.0  # 10 minutes — a deferral, not a new suggestion cycle
+_REMIND_LATER_DELAY_SEC = 600.0  # 10 minutes - a deferral, not a new suggestion cycle
 
 
 class NotificationService(Service):
     """Translates an approved Action into a short widget message, wires
     up feedback capture, and re-queues on REMIND_LATER. No suggestion
-    logic lives here — only what's needed to show and record a response.
+    logic lives here - only what's needed to show and record a response.
     """
 
     def __init__(self, widget_manager: WidgetManager, history: HistoryStore) -> None:
@@ -68,7 +68,7 @@ class NotificationService(Service):
         )
 
     def _handle_feedback(self, action: Action, suggestion_type_name: str, feedback: FeedbackType, mood: WidgetMood) -> None:
-        # Explicit feedback only — no-response is never recorded here.
+        # Explicit feedback only - no-response is never recorded here.
         if suggestion_type_name in SuggestionType.__members__:
             self._history.record_feedback(
                 SuggestionFeedback(

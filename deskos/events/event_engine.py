@@ -1,6 +1,6 @@
 """Rule-based Event Engine: streak-confirmation + debounce.
 
-Design note: this is intentionally the "dumbest thing that works" — a
+Design note: this is intentionally the "dumbest thing that works" - a
 per-label streak counter. It has no ML and no memory of history beyond the
 current streak. That keeps it easy to reason about and easy to replace
 later with a smarter temporal model without touching any other layer.

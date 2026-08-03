@@ -3,7 +3,7 @@
 Rules are intentionally simple and explicit (no learned weights) so they
 are auditable and debuggable while the rest of the pipeline is validated.
 TODO: replace with a learned/LLM-backed ContextInferer once enough labeled
-usage data exists — this class's interface will not need to change.
+usage data exists - this class's interface will not need to change.
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from deskos.core import ContextSnapshot, ContextState, Event, EventType
 
 # MVP label -> state rules. First matching rule wins; order matters.
 # "book" alone implies STUDYING (COCO has no "notebook" class to pair it
-# with — a pragmatic MVP approximation).
+# with - a pragmatic MVP approximation).
 _LABEL_STATE_RULES: tuple[tuple[frozenset[str], ContextState], ...] = (
     (frozenset({"laptop", "keyboard"}), ContextState.CODING),
     (frozenset({"book"}), ContextState.STUDYING),
@@ -74,7 +74,7 @@ class RuleBasedContextEngine:
             return ContextState.AWAY, 0.9
 
         # "Empty chair" isn't a single detectable object (COCO has no such
-        # class) — it's chair present + no person seen, so this is inferred
+        # class) - it's chair present + no person seen, so this is inferred
         # here rather than as a Perception label.
         if "chair" in active and "person" not in active:
             return ContextState.AWAY, 0.8

@@ -1,11 +1,11 @@
 # DeskOS
 
 An open-source AI desktop companion that understands *what you're doing*
-(coding, studying, on a break, away) instead of just recognizing objects —
+(coding, studying, on a break, away) instead of just recognizing objects -
 and quietly helps only when it's confident it's useful. It never
 interrupts, never repeats itself, and prefers silence over a bad guess.
 
-This is an early, evolving MVP. It runs entirely on your machine — no
+This is an early, evolving MVP. It runs entirely on your machine - no
 cloud, no account, nothing leaves your computer.
 
 ---
@@ -13,7 +13,7 @@ cloud, no account, nothing leaves your computer.
 ## Quick Start
 
 **You need:** Windows, macOS, or Linux with Python 3.10+
-([python.org/downloads](https://python.org/downloads) — on Windows, tick
+([python.org/downloads](https://python.org/downloads) - on Windows, tick
 **"Add Python to PATH"** during install).
 
 1. Download and extract this project anywhere (e.g. your Desktop).
@@ -25,7 +25,7 @@ cloud, no account, nothing leaves your computer.
    transparent bubble appears in the corner of your screen.
 
 Click the bubble to expand it into a chat panel; type a message and press
-Enter. Click **-** to collapse it back. Drag it anywhere — it remembers
+Enter. Click **-** to collapse it back. Drag it anywhere - it remembers
 where you put it.
 
 **To stop DeskOS:** close the terminal window, or press `Ctrl+C` in it.
@@ -41,7 +41,7 @@ where you put it.
 
 The default launcher starts the lightweight assistant bubble only. The
 camera-based context pipeline is **opt-in**, because it depends on
-`ultralytics`, which installs PyTorch — several gigabytes.
+`ultralytics`, which installs PyTorch - several gigabytes.
 
 ```bash
 # from the DeskOS folder, with the environment activated
@@ -107,7 +107,7 @@ ruff check .              # lint
 ruff check . --fix        # auto-fix lint issues
 ```
 
-Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions welcome - see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -120,4 +120,4 @@ implementations. Known issues are tracked in
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
