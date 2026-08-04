@@ -1,7 +1,7 @@
 # DeskOS - Engineering Review
 
 Status of this document: living. Findings are checked off as milestones
-land. Last updated at Milestone 4.
+land. Last updated at Milestone 5.
 
 ---
 
@@ -39,6 +39,34 @@ Once confirmed, a label re-emits `OBJECT_APPEARED` every
 liveness signal, not a new appearance. The Context Engine currently
 depends on it to keep labels from expiring, so renaming it means changing
 both layers together. Low priority, but it will confuse the next reader.
+
+---
+
+## Resolved in Milestone 5 (one honest widget)
+
+- [x] **Removed the chat panel.** It replied with a canned placeholder
+      string, dressing a non-feature as a feature, and framed DeskOS as a
+      chatbot - the one thing the README says it is not. It can return when
+      there is something real behind it.
+- [x] **Merged two widgets into one.** A persistent bubble plus a separate
+      suggestion toast meant two surfaces could be on screen at once,
+      breaking "one widget at a time". The bubble is now the renderer: a
+      quiet dot at rest that expands into a suggestion card and collapses
+      back, so the principle holds structurally rather than by convention.
+      A test caught a stacking bug during development, where a second
+      suggestion built a card on top of the first instead of replacing it.
+- [x] **Right-click to quit.** Previously the only way to stop DeskOS was
+      Ctrl+C in a terminal, followed by Windows asking "Terminate batch
+      job (Y/N)?". A companion you cannot politely dismiss is not calm.
+- [x] **TimerService no longer reports success for work it did not do.**
+      It assumed a timer was always running, so the first PAUSE_TIMER
+      "paused" nothing, returned SUCCESS, and burned a ten-minute cooldown.
+      It now starts stopped and returns SKIPPED when already in the
+      requested state.
+
+Known limitation, recorded deliberately: Tk cannot do per-pixel alpha, so
+the resting dot uses colour-key transparency and its edge is slightly
+aliased. Genuine frosted glass needs a different toolkit.
 
 ---
 

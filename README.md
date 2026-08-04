@@ -38,8 +38,9 @@ firehose, or a service that uploads your screen or camera anywhere.
 
 ## Status
 
-Alpha. The assistant bubble, presence detection, suggestion widget and the
-silence rules all work today.
+Alpha. The ambient bubble, presence detection and the silence rules all
+work today. There is no chat interface: DeskOS observes and occasionally
+suggests, rather than waiting to be asked.
 
 A note on what "context" honestly means right now: a laptop's built-in
 webcam cannot see the laptop, keyboard or desk surface, so on most hardware
@@ -70,11 +71,13 @@ The first run creates an isolated Python environment and installs DeskOS
 into it. This takes a few seconds. A small translucent bubble then appears
 in the corner of your screen.
 
-**Using it:** click the bubble to expand it into a chat panel. Type and
-press Enter. Click `-` to collapse it back. Drag it anywhere; it remembers
-where you put it.
+**Using it:** the bubble sits quietly in the corner. When DeskOS has
+something worth saying it expands into a short suggestion, which you can
+answer with Thanks / Not now / Not useful, or ignore until it fades. Drag
+it anywhere; it remembers where you put it.
 
-**Stopping it:** close the terminal window, or press `Ctrl+C` inside it.
+**Stopping it:** right-click the bubble and choose Quit, or press `Ctrl+C`
+in the terminal.
 
 > **Linux:** if you see `ModuleNotFoundError: No module named 'tkinter'`,
 > install it with `sudo apt install python3-tk` on Debian or Ubuntu, or

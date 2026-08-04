@@ -65,7 +65,7 @@ and Decision layers - that is where regressions are least visible and most
 damaging.
 
 Tests that require a display must skip themselves cleanly when none is
-available (see `tests/test_chat_bubble.py` for the pattern), so CI stays
+available (see `tests/test_ambient_bubble.py` for the pattern), so CI stays
 green on headless runners.
 
 ## Commits and branches

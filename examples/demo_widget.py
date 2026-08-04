@@ -18,13 +18,13 @@ import time
 from deskos.config.settings import load_settings
 from deskos.core import WidgetMood
 from deskos.ui.widget_manager import WidgetManager
-from deskos.ui.widgets.floating_widget import FloatingWidget
+from deskos.ui.widgets.ambient_bubble import AmbientBubble
 
 
 def main() -> None:
     settings = load_settings()
     widget_manager = WidgetManager(
-        FloatingWidget(settings.storage.data_dir / "widget_position.json"), settings.ui
+        AmbientBubble(settings.storage.data_dir / "bubble_position.json"), settings.ui
     )
 
     demo_messages = [

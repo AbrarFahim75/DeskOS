@@ -32,18 +32,10 @@ from deskos.services.service_registry import ServiceRegistry
 from deskos.services.timer_service import TimerService
 from deskos.ui.ui_host import UIHost
 from deskos.ui.widget_manager import WidgetManager
-from deskos.ui.widgets.chat_bubble import ChatBubble
-from deskos.ui.widgets.floating_widget import FloatingWidget
+from deskos.ui.widgets.ambient_bubble import AmbientBubble
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("deskos")
-
-_PLACEHOLDER_REPLY = "I can't do much yet, but I'm listening. Voice commands are coming soon!"
-
-
-def _handle_message(text: str) -> str:
-    logger.info("User message: %s", text)
-    return _PLACEHOLDER_REPLY
 
 
 class PerceptionLoop:
@@ -162,19 +154,16 @@ def build_app(
     ui_host = UIHost()
     history = SQLiteHistoryStore(settings.storage.habits_db_path)
 
-    floating = FloatingWidget(settings.storage.data_dir / "widget_position.json")
-    widget_manager = WidgetManager(floating, settings.ui, ui_host=ui_host)
-    bubble = ChatBubble(
-        position_file=settings.storage.data_dir / "chat_bubble_position.json",
-        on_message=_handle_message,
+    # One widget, two states: a quiet dot that becomes a suggestion card.
+    # This is what makes "only one widget visible at a time" structural
+    # rather than a rule someone has to remember.
+    bubble = AmbientBubble(
+        position_file=settings.storage.data_dir / "bubble_position.json",
+        on_quit=ui_host.stop,
     )
+    widget_manager = WidgetManager(bubble, settings.ui, ui_host=ui_host)
 
-    # Widgets are built once the root exists, on the UI thread.
-    def build_ui(root) -> None:
-        floating.attach(root)
-        bubble.attach(root)
-
-    ui_host.on_ready(build_ui)
+    ui_host.on_ready(bubble.attach)
 
     services = ServiceRegistry(
         [TimerService(), NotificationService(widget_manager, history)],
@@ -230,7 +219,7 @@ def main(argv: list[str] | None = None) -> None:
     if loop is not None:
         loop.start()
 
-    logger.info("DeskOS running. Close the bubble or press Ctrl+C to stop.")
+    logger.info("DeskOS running. Right-click the bubble to quit, or press Ctrl+C.")
     try:
         ui_host.run()  # blocks on the Tk event loop until the window closes
     except KeyboardInterrupt:

@@ -31,7 +31,7 @@ from deskos.services.notification_service import NotificationService
 from deskos.services.service_registry import ServiceRegistry
 from deskos.services.timer_service import TimerService
 from deskos.ui.widget_manager import WidgetManager
-from deskos.ui.widgets.floating_widget import FloatingWidget
+from deskos.ui.widgets.ambient_bubble import AmbientBubble
 
 _STATE_ALIASES = {
     "coding": ContextState.CODING,
@@ -48,7 +48,7 @@ def main() -> None:
     reasoner = RuleBasedReasoner()
     decision_engine = DecisionEngine(settings.decision_engine, history_store)
     widget_manager = WidgetManager(
-        FloatingWidget(settings.storage.data_dir / "widget_position.json"), settings.ui
+        AmbientBubble(settings.storage.data_dir / "bubble_position.json"), settings.ui
     )
     services = ServiceRegistry(
         [TimerService(), NotificationService(widget_manager, history_store)], history_store

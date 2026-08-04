@@ -4,7 +4,7 @@ These avoid a real Tk event loop where possible: UIHost's queue and
 availability logic are testable without a display, and build_app can be
 exercised with a settings object pointed at a temp directory. The one
 piece that needs Tk (actually rendering) is left to the existing
-test_chat_bubble smoke tests, which skip when no display exists.
+test_ambient_bubble smoke tests, which skip when no display exists.
 """
 from __future__ import annotations
 
