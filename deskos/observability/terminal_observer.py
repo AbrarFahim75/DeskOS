@@ -23,12 +23,44 @@ class TerminalObserver(PipelineObserver):
     def __init__(self, stream: TextIO | None = None, verbose: bool = False) -> None:
         self._stream = stream if stream is not None else sys.stderr
         self._verbose = verbose
+        self._last_signature: str | None = None
+        self._repeats = 0
 
     def on_tick(self, trace: PipelineTrace) -> None:
         if not self._verbose and self._is_idle(trace):
             return
-        self._stream.write(self._format(trace) + "\n")
+
+        # Nothing changed since the last tick. Printing an identical line
+        # every second buries the moments that actually matter, so count
+        # repeats instead and report them once the state moves on.
+        signature = self._signature(trace)
+        if signature == self._last_signature:
+            self._repeats += 1
+            return
+
+        self._flush_repeats()
+        self._last_signature = signature
+        self._write(self._format(trace))
+
+    def _flush_repeats(self) -> None:
+        if self._repeats:
+            self._write(f"          ... unchanged for {self._repeats} more tick(s)")
+            self._repeats = 0
+
+    def _write(self, line: str) -> None:
+        self._stream.write(line + "\n")
         self._stream.flush()
+
+    @staticmethod
+    def _signature(trace: PipelineTrace) -> str:
+        """What makes a tick meaningfully different from the previous one."""
+        context = trace.context
+        ctx = f"{context.state.name}" if context is not None else "?"
+        detections = ",".join(sorted(d.label for d in trace.detections))
+        outcomes = ";".join(
+            f"{o.suggestion_type.name}:{o.approved}:{o.reason}" for o in trace.outcomes
+        )
+        return f"{ctx}|{detections}|{outcomes}"
 
     @staticmethod
     def _is_idle(trace: PipelineTrace) -> bool:

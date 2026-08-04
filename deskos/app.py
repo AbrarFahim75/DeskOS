@@ -93,7 +93,7 @@ class PerceptionLoop:
         context_engine = RuleBasedContextEngine(settings.context_engine)
         history = self._services.history
         habit_store = InferredHabitStore(history)
-        reasoner = RuleBasedReasoner()
+        reasoner = RuleBasedReasoner(settings.context_engine.long_session_sec)
         decision = DecisionEngine(settings.decision_engine, history)
 
         try:

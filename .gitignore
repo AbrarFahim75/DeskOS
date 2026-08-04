@@ -29,3 +29,7 @@ env/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Diagnostic captures: webcam frames, never commit these
+diagnose_frame.png
+*.webcam.png

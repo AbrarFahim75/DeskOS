@@ -205,3 +205,41 @@ def test_trace_reports_whether_deskos_stayed_silent():
 
     assert silent.stayed_silent is True
     assert acted.stayed_silent is False
+
+
+def test_repeated_identical_ticks_are_collapsed():
+    """A steady state must not print an identical line every second."""
+    stream = io.StringIO()
+    observer = TerminalObserver(stream=stream, verbose=True)
+
+    steady = PipelineTrace(
+        context=ContextSnapshot(state=ContextState.AWAY, confidence=0.9),
+        outcomes=(
+            SuggestionOutcome(
+                suggestion_type=SuggestionType.PAUSE_TIMER,
+                approved=False,
+                reason="IN_COOLDOWN",
+            ),
+        ),
+    )
+    for _ in range(30):
+        observer.on_tick(steady)
+
+    lines = [line for line in stream.getvalue().splitlines() if line.strip()]
+    assert len(lines) == 1, "30 identical ticks should print once"
+
+
+def test_repeat_count_is_reported_when_the_state_changes():
+    stream = io.StringIO()
+    observer = TerminalObserver(stream=stream, verbose=True)
+
+    away = PipelineTrace(context=ContextSnapshot(state=ContextState.AWAY, confidence=0.9))
+    coding = PipelineTrace(context=ContextSnapshot(state=ContextState.CODING, confidence=0.9))
+
+    for _ in range(5):
+        observer.on_tick(away)
+    observer.on_tick(coding)
+
+    output = stream.getvalue()
+    assert "unchanged for 4 more tick(s)" in output
+    assert "CODING" in output

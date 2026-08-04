@@ -1,7 +1,7 @@
 # DeskOS - Engineering Review
 
 Status of this document: living. Findings are checked off as milestones
-land. Last updated at Milestone 3.
+land. Last updated at Milestone 4.
 
 ---
 
@@ -39,6 +39,58 @@ Once confirmed, a label re-emits `OBJECT_APPEARED` every
 liveness signal, not a new appearance. The Context Engine currently
 depends on it to keep labels from expiring, so renaming it means changing
 both layers together. Low priority, but it will confuse the next reader.
+
+---
+
+## Resolved in Milestone 4 (context that matches reality)
+
+Found by running DeskOS against a real webcam, not by any test.
+
+- [x] **DeskOS was permanently stuck in AWAY.** Three faults compounded:
+      `person` matched no rule, so `_infer()` returned UNKNOWN at 0.0
+      confidence; that fell below `min_confidence`, so `update()` discarded
+      it and re-reported the previous belief; and the previous belief was
+      an AWAY(0.90) asserted on the very first tick before any event had
+      been confirmed. The result was a trap: DeskOS believed the user was
+      absent while detecting them in frame, and fired PAUSE_TIMER every ten
+      minutes.
+- [x] **The rules assumed the wrong camera.** They required
+      `laptop + keyboard` for CODING, but a laptop webcam cannot see the
+      laptop it is mounted on. Measured on a real desk: `person` 0.89,
+      `laptop` 0.12, below a background couch at 0.21. CODING was
+      unreachable on the most common hardware in existence.
+- [x] **Presence is now the foundation.** New `PRESENT` state means "at the
+      desk, activity unknown", which is what a face-facing camera can
+      honestly claim. Objects *refine* presence into CODING/STUDYING/BREAK
+      when a camera can actually see them, so an external camera pointed at
+      the desk still gets the specific states.
+- [x] **Startup is UNKNOWN, not AWAY.** A `warmup_sec` window lets DeskOS
+      observe before claiming anything. Absence of evidence is no longer
+      converted into evidence of absence at 0.90 confidence.
+- [x] **AWAY requires sustained absence.** Leaning out of frame is not
+      leaving; `away_timeout_sec` must elapse.
+- [x] **A weak reading can never re-report a strong stale belief.**
+      Sub-threshold confidence now degrades to UNKNOWN.
+- [x] **Bare presence is gated on duration.** "You are at your desk" is not
+      news; "you have been at your desk for 45 minutes" is. Suggestions
+      require `long_session_sec` of unbroken presence.
+- [x] **Debug view collapses repeated ticks.** The observer printed 62
+      near-identical lines a minute, burying the events that mattered.
+- [x] **Warm-up was measured from construction, not first observation.**
+      Found on the second real run: the Context Engine is built before the
+      camera opens and before YOLO lazily loads, which took about six
+      seconds. Warm-up had nearly expired by the time the first frame
+      arrived, so DeskOS declared AWAY and fired PAUSE_TIMER while looking
+      straight at a person. The clock now starts on the first `update()`.
+- [x] **Grace and warm-up retuned against measured behaviour.** A seated
+      person drops out of YOLO's detections for 3-4 seconds at a time on a
+      real laptop webcam, exceeding the 3s `absence_grace_sec` and resetting
+      the streak, so confirmation took 16s instead of 6. Grace raised to 6s,
+      and `warmup_sec` to 20s so it comfortably exceeds `confirm_after_sec`.
+- [x] Added `examples/diagnose_vision.py`, which reports each vision stage
+      separately (camera, frame content, raw YOLO output at 1% confidence,
+      label mapping, threshold) so this class of problem is diagnosable in
+      one run instead of by inference.
 
 ---
 
@@ -145,4 +197,5 @@ both layers together. Low priority, but it will confuse the next reader.
 | 1 | Fix issues 1-4, each with a regression test - **done** |
 | 2 | Unify the UI thread and entry point (issues 5-6) - **done** |
 | 3 | Observable pipeline: see why DeskOS chose silence - **done** |
-| 4+ | Voice, real timer service, integrations |
+| 4 | Context that matches real hardware - **done** |
+| 5+ | Voice, real timer service, integrations |

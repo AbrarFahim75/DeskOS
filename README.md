@@ -38,11 +38,19 @@ firehose, or a service that uploads your screen or camera anywhere.
 
 ## Status
 
-Alpha. The assistant bubble, webcam context detection, suggestion widget
-and the silence rules all work today. The focus timer is a placeholder,
-and voice interaction and desktop automation have not been started.
-Known bugs, and the plan for fixing them, are tracked openly in
-[docs/REVIEW.md](docs/REVIEW.md).
+Alpha. The assistant bubble, presence detection, suggestion widget and the
+silence rules all work today.
+
+A note on what "context" honestly means right now: a laptop's built-in
+webcam cannot see the laptop, keyboard or desk surface, so on most hardware
+DeskOS knows *that you are at your desk and for how long*, not what you are
+doing. Distinguishing coding from studying needs an external camera that
+can actually see those objects. DeskOS reports PRESENT rather than
+inventing an activity it cannot observe.
+
+The focus timer is a placeholder, and voice interaction and desktop
+automation have not been started. Known bugs, and the plan for fixing them,
+are tracked openly in [docs/REVIEW.md](docs/REVIEW.md).
 
 ---
 
@@ -113,7 +121,8 @@ Camera  ->  Perception  ->  Events  ->  Context  ->  Knowledge
 ```
 
 - **Perception** reports what it literally sees. It makes no judgements.
-- **Context** infers an activity: coding, studying, break, away.
+- **Context** infers a state: present, away, or a specific activity when
+  the camera can see enough to justify one.
 - **Decision** is the sole gatekeeper. Confidence thresholds, cooldowns and
   repetition suppression live here and nowhere else, so the rules that keep
   DeskOS quiet cannot be bypassed by a new feature.

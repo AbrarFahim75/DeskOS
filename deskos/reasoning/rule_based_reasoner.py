@@ -24,9 +24,16 @@ _STATE_SUGGESTION: dict[ContextState, SuggestionType] = {
     ContextState.AWAY: SuggestionType.PAUSE_TIMER,
     ContextState.CODING: SuggestionType.RESUME_TIMER,
     ContextState.STUDYING: SuggestionType.PLAY_FOCUS_MUSIC,
+    # PRESENT means "at the desk, activity unknown". The only thing worth
+    # saying about bare presence is that it has gone on a long time, so the
+    # suggestion is gated on duration in `reason()` rather than fired on
+    # sight. UNKNOWN maps to nothing at all: DeskOS has no business
+    # speaking before it knows anything.
+    ContextState.PRESENT: SuggestionType.TAKE_BREAK,
 }
 
 _STATE_VALUE: dict[ContextState, UserValue] = {
+    ContextState.PRESENT: UserValue.MEDIUM,
     ContextState.BREAK: UserValue.MEDIUM,
     ContextState.AWAY: UserValue.HIGH,
     ContextState.CODING: UserValue.LOW,
@@ -34,6 +41,7 @@ _STATE_VALUE: dict[ContextState, UserValue] = {
 }
 
 _STATE_MOOD: dict[ContextState, WidgetMood] = {
+    ContextState.PRESENT: WidgetMood.POSITIVE,
     ContextState.BREAK: WidgetMood.POSITIVE,
     ContextState.AWAY: WidgetMood.IMPORTANT,
     ContextState.CODING: WidgetMood.NEUTRAL,
@@ -42,9 +50,21 @@ _STATE_MOOD: dict[ContextState, WidgetMood] = {
 
 
 class RuleBasedReasoner(Reasoner):
+    def __init__(self, long_session_sec: float = 2700.0) -> None:
+        self._long_session_sec = long_session_sec
+
     def reason(self, context: ContextSnapshot, habits: HabitStore) -> list[Suggestion]:
         suggestion_type = _STATE_SUGGESTION.get(context.state)
         if suggestion_type is None:
+            return []
+
+        # Bare presence only becomes worth mentioning once it has lasted.
+        # "You are at your desk" is not news; "you have been at your desk
+        # for 45 minutes without a break" is.
+        if (
+            context.state == ContextState.PRESENT
+            and context.duration_in_state < self._long_session_sec
+        ):
             return []
 
         # Learn from explicit feedback: a suggestion type the user has
@@ -62,6 +82,12 @@ class RuleBasedReasoner(Reasoner):
                 confidence=context.confidence,
                 estimated_value=_STATE_VALUE.get(context.state, UserValue.MEDIUM),
                 mood=_STATE_MOOD.get(context.state, WidgetMood.NEUTRAL),
-                reason=f"Context inferred as {context.state.name}",
+                reason=self._describe(context),
             )
         ]
+
+    def _describe(self, context: ContextSnapshot) -> str:
+        if context.state == ContextState.PRESENT:
+            minutes = int(context.duration_in_state // 60)
+            return f"At the desk for {minutes} minutes without a break"
+        return f"Context inferred as {context.state.name}"

@@ -42,7 +42,9 @@ class EventEngineSettings:
 @dataclass(frozen=True)
 class ContextEngineSettings:
     min_confidence: float
-    away_timeout_sec: float
+    away_timeout_sec: float      # sustained absence before declaring AWAY
+    warmup_sec: float = 20.0     # observe silently before claiming anything
+    long_session_sec: float = 2700.0  # unbroken presence before suggesting a break
 
 
 @dataclass(frozen=True)

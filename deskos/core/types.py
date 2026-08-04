@@ -82,14 +82,23 @@ class Event:
 # --------------------------------------------------------------------------
 
 class ContextState(Enum):
-    """User state. MVP supports the first four; rest are future extensions."""
+    """User state, ordered from least to most specific knowledge.
+
+    PRESENT is deliberately vague: it means "you are at your desk, activity
+    unknown". A laptop's built-in webcam cannot see the laptop it is
+    mounted on, let alone the keyboard or desk surface, so on most hardware
+    presence is the only thing DeskOS can honestly claim. The more specific
+    states are refinements that require a camera which can actually see
+    those objects.
+    """
     CODING = auto()
     STUDYING = auto()
     BREAK = auto()
+    PRESENT = auto()    # person at the desk; activity not determined
     AWAY = auto()
     THINKING = auto()   # future
     READING = auto()    # future
-    UNKNOWN = auto()
+    UNKNOWN = auto()    # not enough observation yet to say anything
 
 
 @dataclass(frozen=True)
