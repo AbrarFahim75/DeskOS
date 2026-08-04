@@ -1,7 +1,7 @@
 # DeskOS - Engineering Review
 
 Status of this document: living. Findings are checked off as milestones
-land. Last updated at Milestone 2.
+land. Last updated at Milestone 3.
 
 ---
 
@@ -39,6 +39,28 @@ Once confirmed, a label re-emits `OBJECT_APPEARED` every
 liveness signal, not a new appearance. The Context Engine currently
 depends on it to keep labels from expiring, so renaming it means changing
 both layers together. Low priority, but it will confuse the next reader.
+
+---
+
+## Resolved in Milestone 3 (observability)
+
+- [x] **Silence was unattributable.** DeskOS's defining behaviour is not
+      acting, but a correct silence and a broken one looked identical. The
+      Decision Engine now records a `SuppressionReason` for every rejected
+      suggestion (`LOW_CONFIDENCE`, `IN_COOLDOWN`, `LOW_USER_VALUE`,
+      `NO_ACTION_MAPPING`), the mirror image of the existing
+      `approval_reason`.
+- [x] **Added a `PipelineObserver` seam.** `decide()` keeps its exact
+      contract; a new `evaluate()` returns approvals *and* rejections with
+      reasons, and `decide()` is defined in terms of it so the two can
+      never disagree. With no observer attached the pipeline behaves
+      identically, so diagnostics are never in the hot path.
+- [x] **Terminal debug view.** `deskos.app --debug` prints one compact,
+      greppable line per tick showing detections, inferred context with
+      confidence, and what the Decision Engine did, including why it stayed
+      quiet. Idle ticks are hidden unless `--debug-verbose` is passed.
+      `examples/demo_pipeline.py` uses the same view, so the reasoning can
+      be watched without a webcam or the vision extra.
 
 ---
 
@@ -122,5 +144,5 @@ both layers together. Low priority, but it will confuse the next reader.
 | 0 | Repository hygiene - **done** |
 | 1 | Fix issues 1-4, each with a regression test - **done** |
 | 2 | Unify the UI thread and entry point (issues 5-6) - **done** |
-| 3 | Observable pipeline: see why DeskOS chose silence |
+| 3 | Observable pipeline: see why DeskOS chose silence - **done** |
 | 4+ | Voice, real timer service, integrations |

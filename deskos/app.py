@@ -25,6 +25,7 @@ from deskos.decision.decision_engine import DecisionEngine
 from deskos.events.event_engine import EventEngine
 from deskos.knowledge.habit_store import InferredHabitStore
 from deskos.knowledge.history_store import SQLiteHistoryStore
+from deskos.observability import PipelineObserver, PipelineTrace
 from deskos.reasoning.rule_based_reasoner import RuleBasedReasoner
 from deskos.services.notification_service import NotificationService
 from deskos.services.service_registry import ServiceRegistry
@@ -52,9 +53,15 @@ class PerceptionLoop:
     Services it dispatches to, which post onto the UI thread themselves.
     """
 
-    def __init__(self, settings: Settings, services: ServiceRegistry) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        services: ServiceRegistry,
+        observer: PipelineObserver | None = None,
+    ) -> None:
         self._settings = settings
         self._services = services
+        self._observer = observer
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
 
@@ -106,7 +113,22 @@ class PerceptionLoop:
                     if context.is_transition:
                         history.record_context_transition(context)
                     suggestions = reasoner.reason(context, habit_store)
-                    actions = decision.decide(suggestions)
+
+                    if self._observer is None:
+                        actions = decision.decide(suggestions)
+                    else:
+                        evaluated = decision.evaluate(suggestions)
+                        actions = [a for a, _ in evaluated if a is not None]
+                        self._observer.on_tick(
+                            PipelineTrace(
+                                detections=tuple(detections),
+                                events=tuple(events),
+                                context=context,
+                                suggestions=tuple(suggestions),
+                                outcomes=tuple(o for _, o in evaluated),
+                            )
+                        )
+
                     self._services.dispatch(actions)
                 self._stop.wait(settings.perception.detection_interval_sec)
         finally:
@@ -124,9 +146,16 @@ def _vision_available() -> bool:
     return True
 
 
-def build_app(settings: Settings | None = None) -> tuple[UIHost, PerceptionLoop | None]:
+def build_app(
+    settings: Settings | None = None,
+    observer: PipelineObserver | None = None,
+) -> tuple[UIHost, PerceptionLoop | None]:
     """Assemble the whole application. Returns the UI host and, if vision is
     available, the perception loop (not yet started).
+
+    An optional `observer` receives a PipelineTrace each tick for
+    diagnostics. When None (the default), the pipeline runs identically and
+    emits nothing.
     """
     settings = settings or load_settings()
 
@@ -154,7 +183,7 @@ def build_app(settings: Settings | None = None) -> tuple[UIHost, PerceptionLoop 
 
     loop: PerceptionLoop | None = None
     if _vision_available():
-        loop = PerceptionLoop(settings, services)
+        loop = PerceptionLoop(settings, services, observer=observer)
     else:
         logger.info(
             "Vision extra not installed; running as assistant only. "
@@ -164,8 +193,34 @@ def build_app(settings: Settings | None = None) -> tuple[UIHost, PerceptionLoop 
     return ui_host, loop
 
 
-def main() -> None:
-    ui_host, loop = build_app()
+def main(argv: list[str] | None = None) -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog="deskos",
+        description="A calm, context-aware desktop companion.",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Print the pipeline's decisions each tick, including why it "
+        "chose to stay silent. Diagnostic only; does not change behaviour.",
+    )
+    parser.add_argument(
+        "--debug-verbose",
+        action="store_true",
+        help="Like --debug but also prints idle ticks (nothing detected).",
+    )
+    args = parser.parse_args(argv)
+
+    observer = None
+    if args.debug or args.debug_verbose:
+        from deskos.observability.terminal_observer import TerminalObserver
+
+        observer = TerminalObserver(verbose=args.debug_verbose)
+        logger.info("Debug pipeline view enabled.")
+
+    ui_host, loop = build_app(observer=observer)
 
     if not ui_host.available:
         # No display at all (e.g. headless). Nothing to show; exit cleanly.

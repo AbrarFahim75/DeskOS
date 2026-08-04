@@ -61,3 +61,21 @@ See [REVIEW.md](REVIEW.md) for the full assessment. The Tk threading and
 Services-to-UI coupling issues were resolved in Milestone 2. One minor item
 remains: `OBJECT_APPEARED` is re-emitted as a liveness heartbeat, which the
 name does not convey.
+
+## Observability
+
+`deskos.observability` defines a one-directional diagnostic seam. A
+`PipelineObserver` receives a `PipelineTrace` per tick and may print, log,
+or count it, but can never influence a decision - that would make
+diagnostics part of the product's behaviour.
+
+The Decision Engine exposes `evaluate()`, returning each suggestion's
+Action (or None) alongside a `SuggestionOutcome` explaining approval or
+naming the `SuppressionReason`. `decide()` is defined as `evaluate()` with
+rejections dropped, so the diagnostic and production paths cannot diverge.
+
+```bash
+python -m deskos.app --debug           # one line per tick, idle ticks hidden
+python -m deskos.app --debug-verbose   # include idle ticks
+python examples/demo_pipeline.py       # same view, no webcam needed
+```
