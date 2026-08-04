@@ -25,6 +25,13 @@ class ServiceRegistry:
         self._services = services
         self._history = history
 
+    @property
+    def history(self) -> HistoryStore:
+        """The shared history store, so callers assembling a loop reuse the
+        same instance rather than opening a second connection to the DB.
+        """
+        return self._history
+
     def dispatch(self, actions: list[Action]) -> None:
         for action in actions:
             handled = False

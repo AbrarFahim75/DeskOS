@@ -5,10 +5,10 @@ fades in/out on its own), this widget stays visible on screen permanently
 as a small transparent circle. Clicking it expands into a minimal chat
 panel; clicking the panel's collapse control returns it to the bubble.
 
-Runs a single Tk event loop directly on the calling thread via `run()` --
-this is meant to be the only UI running in a process (see
-`deskos.assistant_app`), so it does not need the background-thread/queue
-dance `FloatingWidget` uses to coexist with a separate perception loop.
+Runs as a guest inside a Tk root owned by `UIHost`, so it can coexist with
+the suggestion widget and the perception loop in one process. Call
+`attach(root)` once on the UI thread to build it; it draws into that root
+rather than creating its own.
 
 Transparency uses Tk's `-transparentcolor` window attribute (Windows-only):
 any pixel left at that exact color becomes both invisible and click-through,
@@ -22,6 +22,7 @@ import json
 import logging
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -45,22 +46,30 @@ class ChatBubble:
         self._expanded = False
         self._supports_transparency = False
         self._drag = {"x": 0, "y": 0, "moved": False}
+        self._root: Any = None
 
-    def run(self) -> None:
-        """Builds the window and blocks on the Tk event loop until closed."""
+    def attach(self, root: Any) -> None:
+        """Build the bubble as a child of a shared Tk root.
+
+        Call once, on the UI thread. Replaces the old `run()`, which created
+        and owned its own root - incompatible with hosting other widgets.
+        """
+        self._root = root
         self._build()
-        self._root.mainloop()
 
     def _build(self) -> None:
         """Constructs the window and widgets without entering the event
-        loop. Split out from `run()` so tests can build and inspect the
-        widget tree without blocking on `mainloop()`.
+        loop. Uses the shared root given via `attach()`. Split out so tests
+        can build and inspect the widget tree without a running loop.
         """
         import tkinter as tk
 
         self._tk = tk
-        root = tk.Tk()
-        root.withdraw()  # hidden root exists only to own the event loop
+        root = self._root if self._root is not None else tk.Tk()
+        if self._root is None:
+            # Standalone/test fallback: no host supplied one, so make a
+            # private hidden root purely to parent the window.
+            root.withdraw()
         self._root = root
 
         self._window = tk.Toplevel(root)

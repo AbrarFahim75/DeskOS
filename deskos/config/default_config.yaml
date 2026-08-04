@@ -16,11 +16,19 @@ event_engine:
   # how fast the main loop ticks.
   confirm_after_sec: 6.0       # how long an object must persist to count as real
   event_debounce_sec: 5.0      # minimum gap between repeat emissions
-  absence_grace_sec: 3.0       # brief detector flickers do not reset progress
+  # Measured on a real laptop webcam: a seated person drops out of YOLO's
+  # detections for 3-4 seconds at a time. A 3s grace was too tight and kept
+  # resetting the streak, so confirmation took 16s instead of 6.
+  absence_grace_sec: 6.0       # brief detector flickers do not reset progress
 
 context_engine:
-  min_confidence: 0.6
-  away_timeout_sec: 60.0
+  min_confidence: 0.6          # below this, DeskOS reports UNKNOWN rather than guess
+  away_timeout_sec: 60.0       # person unseen this long before declaring AWAY
+  # Must comfortably exceed event_engine.confirm_after_sec, or warm-up can
+  # end before a person has had a chance to be confirmed, and DeskOS would
+  # declare AWAY while looking straight at someone.
+  warmup_sec: 20.0             # observe silently at startup before claiming anything
+  long_session_sec: 2700.0     # 45 min of unbroken presence before offering a break
 
 decision_engine:
   suggestion_cooldown_sec: 600.0   # never repeat a suggestion type within 10 min

@@ -49,8 +49,7 @@ Issues = "https://github.com/datazenith-labs/DeskOS/issues"
 # Console commands created on install, so DeskOS can be started from any
 # directory instead of only from the repository root.
 [project.scripts]
-deskos = "deskos.assistant_app:main"
-deskos-vision = "deskos.main:main"
+deskos = "deskos.app:main"
 
 [tool.setuptools.packages.find]
 include = ["deskos*"]

@@ -59,4 +59,4 @@ echo ""
 echo "Starting DeskOS..."
 echo "A small transparent bubble will appear in the corner of your screen."
 echo ""
-"$VENV_PY" -m deskos.assistant_app
+"$VENV_PY" -m deskos.app

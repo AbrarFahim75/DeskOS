@@ -1,8 +1,9 @@
-"""Routes SHOW_WIDGET actions to the UI's WidgetManager and records
-whatever explicit feedback the user gives back into History.
+"""Routes SHOW_WIDGET actions to the UI and records whatever explicit
+feedback the user gives back into History.
 
-Kept as a Service (not a direct UI call from Decision) so Decision never
-imports UI - it only returns Actions, per architecture rule.
+Depends on the WidgetPresenter contract, not a concrete UI class, so the
+Services layer never imports a specific toolkit. Kept as a Service (not a
+direct call from Decision) so Decision never touches UI at all.
 """
 from __future__ import annotations
 
@@ -21,7 +22,7 @@ from deskos.core import (
 )
 from deskos.knowledge.interfaces import HistoryStore
 from deskos.services.interfaces import Service
-from deskos.ui.widget_manager import WidgetManager
+from deskos.ui.interfaces import WidgetPresenter
 
 _SUGGESTION_COPY: dict[str, str] = {
     "TAKE_BREAK": "\u2615 Break?",
@@ -37,8 +38,8 @@ class NotificationService(Service):
     logic lives here - only what's needed to show and record a response.
     """
 
-    def __init__(self, widget_manager: WidgetManager, history: HistoryStore) -> None:
-        self._widget_manager = widget_manager
+    def __init__(self, presenter: WidgetPresenter, history: HistoryStore) -> None:
+        self._presenter = presenter
         self._history = history
 
     @property
@@ -58,7 +59,7 @@ class NotificationService(Service):
 
         status = ExecutionStatus.SKIPPED
         if message:
-            self._widget_manager.show(
+            self._presenter.show(
                 message, mood=mood,
                 on_feedback=lambda feedback: self._handle_feedback(action, suggestion_type_name, feedback, mood),
             )
@@ -81,7 +82,7 @@ class NotificationService(Service):
             message = _SUGGESTION_COPY.get(suggestion_type_name, "")
             timer = threading.Timer(
                 _REMIND_LATER_DELAY_SEC,
-                lambda: self._widget_manager.show(
+                lambda: self._presenter.show(
                     message, mood=mood,
                     on_feedback=lambda fb: self._handle_feedback(action, suggestion_type_name, fb, mood),
                 ),

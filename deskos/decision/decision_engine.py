@@ -16,6 +16,7 @@ from deskos.config.settings import DecisionEngineSettings
 from deskos.core import Action, ActionType, Suggestion, SuggestionType, UserValue
 from deskos.decision.interfaces import DecisionMaker
 from deskos.knowledge.interfaces import HistoryStore
+from deskos.observability import SuggestionOutcome, SuppressionReason
 
 _SUGGESTION_TO_ACTION: dict[SuggestionType, ActionType] = {
     SuggestionType.TAKE_BREAK: ActionType.SHOW_WIDGET,
@@ -44,36 +45,58 @@ class DecisionEngine(DecisionMaker):
         self._history = history
 
     def decide(self, suggestions: list[Suggestion]) -> list[Action]:
-        actions: list[Action] = []
+        """Return the Actions approved from `suggestions`.
 
+        The public contract is unchanged: only approved Actions come back.
+        Use `evaluate()` when the rejections and their reasons are also
+        wanted (diagnostics); `decide()` is `evaluate()` with the rejections
+        dropped, so the two can never disagree.
+        """
+        return [action for action, _ in self.evaluate(suggestions) if action is not None]
+
+    def evaluate(
+        self, suggestions: list[Suggestion]
+    ) -> list[tuple[Action | None, SuggestionOutcome]]:
+        """Judge each suggestion, returning both the Action (or None) and an
+        outcome record explaining approval or the reason for silence.
+        """
+        results: list[tuple[Action | None, SuggestionOutcome]] = []
         for suggestion in suggestions:
-            if suggestion.confidence < self._settings.min_confidence_to_act:
-                continue  # rule 3: only react with high confidence
+            results.append(self._judge(suggestion))
+        return results
 
-            since_last = self._history.seconds_since_last_suggestion(suggestion.type)
-            if since_last is not None and since_last < self._settings.suggestion_cooldown_sec:
-                continue  # rules 1 & 2: never repeat, never interrupt
+    def _judge(self, suggestion: Suggestion) -> tuple[Action | None, SuggestionOutcome]:
+        stype = suggestion.type
 
-            if not self._passes_user_value_check(suggestion):
-                continue  # golden rule: don't act unless doing nothing costs the user something real
+        if suggestion.confidence < self._settings.min_confidence_to_act:
+            return None, self._rejected(stype, SuppressionReason.LOW_CONFIDENCE)
 
-            action_type = _SUGGESTION_TO_ACTION.get(suggestion.type)
-            if action_type is None:
-                continue  # TODO: extend mapping as new SuggestionTypes land
+        since_last = self._history.seconds_since_last_suggestion(stype)
+        if since_last is not None and since_last < self._settings.suggestion_cooldown_sec:
+            return None, self._rejected(stype, SuppressionReason.IN_COOLDOWN)
 
-            actions.append(
-                Action(
-                    type=action_type,
-                    payload={
-                        "suggestion_type": suggestion.type.name,
-                        "reason": suggestion.reason,
-                        "mood": suggestion.mood.name,
-                    },
-                    approval_reason=self._approval_reason(suggestion, since_last),
-                )
-            )
+        if not self._passes_user_value_check(suggestion):
+            return None, self._rejected(stype, SuppressionReason.LOW_USER_VALUE)
 
-        return actions
+        action_type = _SUGGESTION_TO_ACTION.get(stype)
+        if action_type is None:
+            return None, self._rejected(stype, SuppressionReason.NO_ACTION_MAPPING)
+
+        approval = self._approval_reason(suggestion, since_last)
+        action = Action(
+            type=action_type,
+            payload={
+                "suggestion_type": stype.name,
+                "reason": suggestion.reason,
+                "mood": suggestion.mood.name,
+            },
+            approval_reason=approval,
+        )
+        return action, SuggestionOutcome(suggestion_type=stype, approved=True, reason=approval)
+
+    @staticmethod
+    def _rejected(stype: SuggestionType, reason: SuppressionReason) -> SuggestionOutcome:
+        return SuggestionOutcome(suggestion_type=stype, approved=False, reason=reason.name)
 
     def _passes_user_value_check(self, suggestion: Suggestion) -> bool:
         """"If I do nothing right now, will the user lose meaningful

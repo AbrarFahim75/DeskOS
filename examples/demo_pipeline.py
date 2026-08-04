@@ -4,6 +4,9 @@ UI). Unlike demo_widget.py, this exercises real cooldowns, confidence
 gating, and the user-value check - including DeskOS choosing to stay
 silent, which is the point of the product.
 
+Each entry prints one pipeline line showing the inferred context and what
+the Decision Engine did with it, including the reason for any silence.
+
 Run: python examples/demo_pipeline.py
 Then type: coding / studying / break / away / quit
 """
@@ -21,6 +24,8 @@ from deskos.core import ContextSnapshot, ContextState
 from deskos.decision.decision_engine import DecisionEngine
 from deskos.knowledge.habit_store import InferredHabitStore
 from deskos.knowledge.history_store import SQLiteHistoryStore
+from deskos.observability import PipelineTrace
+from deskos.observability.terminal_observer import TerminalObserver
 from deskos.reasoning.rule_based_reasoner import RuleBasedReasoner
 from deskos.services.notification_service import NotificationService
 from deskos.services.service_registry import ServiceRegistry
@@ -48,6 +53,9 @@ def main() -> None:
     services = ServiceRegistry(
         [TimerService(), NotificationService(widget_manager, history_store)], history_store
     )
+    # Always verbose here: seeing *why* DeskOS stayed silent is the whole
+    # point of this demo, so unlike the real app it never hides a tick.
+    observer = TerminalObserver(stream=sys.stdout, verbose=True)
 
     print("Type a state (coding / studying / break / away) or 'quit'.")
     print("Repeating the same state within the cooldown window will correctly produce silence.\n")
@@ -64,14 +72,17 @@ def main() -> None:
         context = ContextSnapshot(state=state, confidence=0.9, is_transition=True)
         history_store.record_context_transition(context)
         suggestions = reasoner.reason(context, habit_store)
-        actions = decision_engine.decide(suggestions)
 
-        if not actions:
-            print("  -> DeskOS stayed silent (no action approved).")
-        else:
-            services.dispatch(actions)
-            for action in actions:
-                print(f"  -> Action: {action.type.name} (approval: {action.approval_reason})")
+        evaluated = decision_engine.evaluate(suggestions)
+        actions = [a for a, _ in evaluated if a is not None]
+        observer.on_tick(
+            PipelineTrace(
+                context=context,
+                suggestions=tuple(suggestions),
+                outcomes=tuple(o for _, o in evaluated),
+            )
+        )
+        services.dispatch(actions)
 
     history_store.close()
 

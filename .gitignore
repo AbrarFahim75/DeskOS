@@ -20,6 +20,13 @@ env/
 .deskos/
 *.db
 
+# Diagnostic captures. These are photographs of the user at their desk.
+# DeskOS promises that nothing leaves your machine, so a webcam frame must
+# never reach a public repository. The diagnostic writes to ~/.deskos by
+# design; this pattern is the second line of defence.
+diagnose_*.png
+*.webcam.png
+
 # Model weights: downloaded automatically by ultralytics on first use.
 # Keeping these out of git stops the repo growing by megabytes per model.
 *.pt
