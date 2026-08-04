@@ -23,7 +23,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from deskos.config.settings import load_settings  # noqa: E402
 from deskos.perception.object_detector import _COCO_LABEL_MAP  # noqa: E402
 
-_SAVED_FRAME = Path("diagnose_frame.png")
+# Deliberately written OUTSIDE the repository. This is a photo of the user
+# at their desk; saving it into a working tree makes it one `git add -A`
+# away from a public commit, which is exactly what happened once.
+_SAVED_FRAME = Path.home() / ".deskos" / "diagnose_frame.png"
 
 
 def main() -> None:
@@ -83,9 +86,12 @@ def main() -> None:
     try:
         import cv2
 
+        _SAVED_FRAME.parent.mkdir(parents=True, exist_ok=True)
         cv2.imwrite(str(_SAVED_FRAME), image)
-        print(f"    saved a copy to: {_SAVED_FRAME.resolve()}")
+        print(f"    saved a copy to: {_SAVED_FRAME}")
         print("    -> Open it. If you cannot see your desk, the camera is the problem.")
+        print("    -> This is a photo of you. It is saved outside the repository")
+        print("       on purpose; delete it when you are done.")
     except Exception as exc:
         print(f"    could not save frame: {exc}")
 
